@@ -24,8 +24,10 @@ source venv/bin/activate
 
 ### 3. Instala las dependencias
 
+Si aún no tienes `uv` instalado, puedes hacerlo desde [aquí](https://docs.astral.sh/uv/).
+
 ```bash
-pip install -r requirements.txt
+uv add -r requirements.txt
 ```
 
 ### 4. Ejecuta la aplicación

@@ -39,6 +39,7 @@ dependencies = [
     "pydantic-extra-types==2.11.0",
     "pydantic-settings==2.13.1",
     "pygments==2.19.2",
+    "pyright>=1.1.408",
     "pytest==9.0.2",
     "python-dotenv==1.2.1",
     "python-multipart==0.0.22",
@@ -46,8 +47,10 @@ dependencies = [
     "rich==14.3.3",
     "rich-toolkit==0.19.7",
     "rignore==0.7.6",
+    "ruff>=0.15.5",
     "sentry-sdk==2.53.0",
     "shellingham==1.5.4",
+    "sqlalchemy>=2.0.48",
     "starlette==0.52.1",
     "typer==0.24.1",
     "typing-extensions==4.15.0",
@@ -57,3 +60,8 @@ dependencies = [
     "watchfiles==1.1.1",
     "websockets==16.0",
 ]
+
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "I"]
