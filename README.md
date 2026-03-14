@@ -40,3 +40,4 @@ python main.py
 ---
 Si tienes dudas o problemas, revisa la documentación o abre un issue.
 Es la api para la casa inteligente
+Agregar más documentación en adelante
