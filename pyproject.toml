@@ -39,6 +39,7 @@ dependencies = [
     "pydantic-extra-types==2.11.0",
     "pydantic-settings==2.13.1",
     "pygments==2.19.2",
+    "pymysql>=1.1.2",
     "pyright>=1.1.408",
     "pytest==9.0.2",
     "python-dotenv==1.2.1",
@@ -61,7 +62,15 @@ dependencies = [
     "websockets==16.0",
 ]
 
+[tool.uv]
+package = true
+
+[tool.setuptools]
+packages = ["app"]
 
 [tool.ruff]
 line-length = 88
 select = ["E", "F", "I"]
+
+[project.scripts]
+start-db = "scripts.start_db:create_tables"
