@@ -16,7 +16,17 @@ class DatabaseSettings(BaseSettings):
     password: str
     name_db: str
 
-    model_config = SettingsConfigDict(env_prefix="DB_")
+    model_config = SettingsConfigDict(env_prefix="DB_", env_file=".env", extra="ignore")
 
 
 database_settings = DatabaseSettings()
+
+
+class GeneralSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    debug: bool = False
+    sql_debug: bool = False
+
+
+general_settings = GeneralSettings()
