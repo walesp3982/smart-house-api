@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class AvailableDatabases(StrEnum):
     sqlite = "sqlite"
     mysql = "mysql"
+    postgresql = "postgresql"
 
 
 class DatabaseSettings(BaseSettings):
