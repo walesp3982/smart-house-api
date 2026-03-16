@@ -72,6 +72,5 @@ line-length = 88
 select = ["E", "F", "I"]
 
 [project.scripts]
-start-db = "app.scripts.start_db:create_tables"
 dev = "app.scripts.server:dev"
 prod = "app.scripts.server:prod"
