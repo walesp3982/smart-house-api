@@ -69,7 +69,7 @@ package = true
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "I"]
+lint.select = ["E", "F", "I"]
 
 [project.scripts]
 dev = "app.scripts.server:dev"
