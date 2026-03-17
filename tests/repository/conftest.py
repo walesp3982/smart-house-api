@@ -9,10 +9,13 @@ from app.repository import UserRepository
 def connection():
     """Fixture to create an in-memory SQLite database engine."""
     engine = create_engine("sqlite:///:memory:", echo=False)
-    with engine.begin() as connection:
-        metadata.create_all(bind=connection)
-        yield connection
-        metadata.drop_all(bind=connection)
+    with engine.begin() as conn:
+        metadata.create_all(bind=conn)
+
+    with engine.connect() as conn:
+        transaction = conn.begin()
+        yield conn
+        transaction.rollback()
 
 
 @pytest.fixture
