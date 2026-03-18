@@ -63,13 +63,11 @@ class UserRepository:
             raise UserNotFoundError(user_id)
 
     def create(self, user: UserDTO) -> int:
-        query = (
-            insert(users)
-            .values(name=user.name, email=user.email, password=user.password)
-            .returning(users.c.id)
+        query = insert(users).values(
+            name=user.name, email=user.email, password=user.password
         )
         try:
             result = self.connection.execute(query)
-            return result.scalar_one()
+            return result.lastrowid
         except IntegrityError as e:
             raise DatabaseConstraintException(str(e.orig))
