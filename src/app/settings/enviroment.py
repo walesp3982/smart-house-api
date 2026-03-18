@@ -37,7 +37,9 @@ class JWTSettings(BaseSettings):
     secret_key: str
     expiration_minutes: int = 30
 
-    model_config = SettingsConfigDict(env_prefix="JWT", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="JWT_", env_file=".env", extra="ignore"
+    )
 
 
 jwt_settings = JWTSettings()  # pyright: ignore[reportCallIssue]

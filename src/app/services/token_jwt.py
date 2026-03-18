@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 import jwt
 
+from app.schemas import Payload
 from app.settings import jwt_settings
 
 
@@ -19,18 +19,23 @@ class TokenJWTService:
 
         return datetime_expiration
 
-    def encode(self, data: dict[str, Any]) -> str:
-        payload = data.copy()
-        payload["exp"] = self.get_datetime_expiration()
-        payload["iat"] = datetime.now(timezone.utc)
-        encoded = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
+    def encode(self, user_id: int, name: str) -> str:
+        exp = self.get_datetime_expiration()
+        iat = datetime.now(timezone.utc)
+        payload = Payload(sub=str(user_id), name=name, exp=exp, iat=iat)
+        encoded = jwt.encode(
+            payload.model_dump(),
+            self.secret_key,
+            algorithm=self.algorithm,
+        )
         return encoded
 
-    def decode(self, encoded: str) -> dict[str, Any]:
+    def decode(self, encoded: str) -> Payload:
         try:
             decode = jwt.decode(encoded, self.secret_key, algorithms=[self.algorithm])
-            return decode
+            payload = Payload(**decode)
+            return payload
         except jwt.ExpiredSignatureError:
-            raise Exception("Jwt Ya expirada")
+            raise jwt.ExpiredSignatureError("Jwt Ya expirada")
         except jwt.InvalidTokenError as e:
-            raise Exception(f"Token inválido: {e}")
+            raise jwt.InvalidTokenError(f"Token inválido: {e}")

@@ -1,4 +1,4 @@
 from .database import ConnectionDep, UserRepositoryDep
-from .service import TokenJWTService, UserServiceDep
+from .service import TokenJWTServiceDep, UserServiceDep
 
-__all__ = ["ConnectionDep", "UserRepositoryDep", "UserServiceDep", "TokenJWTService"]
+__all__ = ["ConnectionDep", "UserRepositoryDep", "UserServiceDep", "TokenJWTServiceDep"]
