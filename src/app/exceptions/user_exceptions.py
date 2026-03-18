@@ -3,7 +3,7 @@ class UserNotFoundException(Exception):
         super().__init__(f"User with id:{id} not found")
 
 
-class CredencialsUserIncorrect(Exception):
+class CredencialsUserIncorrectException(Exception):
     def __init__(self) -> None:
         super().__init__("La credenciales proporcionadas son incorrectas")
 
@@ -13,7 +13,7 @@ class UserNotFoundByEmailException(Exception):
         super().__init__(f"No se encontró el usuario con email {email}")
 
 
-class UserNotCreated(Exception):
+class UserNotCreatedException(Exception):
     def __init__(self) -> None:
         super().__init__("El usuario no ha podido ser creado")
 
