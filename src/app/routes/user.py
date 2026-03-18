@@ -5,7 +5,7 @@ from app.dto import UserDTO
 from app.exceptions import EmailAlreadyRegisterError
 from app.schemas import VisibleDataUser
 
-router = APIRouter(prefix="users", tags=["users"])
+router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register")
