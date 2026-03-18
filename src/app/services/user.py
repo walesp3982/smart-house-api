@@ -6,6 +6,7 @@ from app.exceptions import (
     CredencialsUserIncorrect,
     UserNotCreated,
     UserNotFoundByEmailException,
+    UserNotFoundByIdException,
 )
 from app.repository.interfaces import UserRepositoryProtocol
 from app.schemas import CredencialsUser
@@ -37,3 +38,9 @@ class UserService:
         if self.password_hash.verify(user.password, credencials.password):
             return user
         raise CredencialsUserIncorrect()
+
+    def get_user_by_id(self, user_id: int) -> User:
+        user = self.repository.get_by_id(user_id)
+        if user is None:
+            raise UserNotFoundByIdException(user_id)
+        return user

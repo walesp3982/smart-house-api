@@ -16,3 +16,8 @@ class UserNotFoundByEmailException(Exception):
 class UserNotCreated(Exception):
     def __init__(self) -> None:
         super().__init__("El usuario no ha podido ser creado")
+
+
+class UserNotFoundByIdException(Exception):
+    def __init__(self, id: int) -> None:
+        super().__init__(f"No se encontró el usuario con id {id}")

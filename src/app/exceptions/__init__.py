@@ -3,6 +3,7 @@ from .user_exceptions import (
     CredencialsUserIncorrect,
     UserNotCreated,
     UserNotFoundByEmailException,
+    UserNotFoundByIdException,
     UserNotFoundException,
 )
 
@@ -12,4 +13,5 @@ __all__ = [
     "CredencialsUserIncorrect",
     "UserNotFoundByEmailException",
     "UserNotCreated",
+    "UserNotFoundByIdException",
 ]
