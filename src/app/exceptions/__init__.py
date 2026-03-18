@@ -1,6 +1,7 @@
 from .database_exceptions import DatabaseConstraintException
 from .user_exceptions import (
     CredencialsUserIncorrectException,
+    EmailAlreadyRegisterError,
     UserNotCreatedException,
     UserNotFoundByEmailException,
     UserNotFoundByIdException,
@@ -14,4 +15,5 @@ __all__ = [
     "UserNotFoundByEmailException",
     "UserNotCreatedException",
     "UserNotFoundByIdException",
+    "EmailAlreadyRegisterError",
 ]

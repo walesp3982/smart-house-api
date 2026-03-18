@@ -4,6 +4,7 @@ from app.dto import UserDTO
 from app.entities import User
 from app.exceptions import (
     CredencialsUserIncorrectException,
+    EmailAlreadyRegisterError,
     UserNotCreatedException,
     UserNotFoundByEmailException,
     UserNotFoundByIdException,
@@ -44,3 +45,14 @@ class UserService:
         if user is None:
             raise UserNotFoundByIdException(user_id)
         return user
+
+    def register(self, user_dto: UserDTO) -> User:
+
+        # Vemos que el usuario no exista en la db
+        if self.repository.get_by_email(user_dto.email) is None:
+            raise EmailAlreadyRegisterError
+
+        # Creamos el usuario
+        user_id = self.repository.create(user_dto)
+
+        return self.get_user_by_id(user_id)
