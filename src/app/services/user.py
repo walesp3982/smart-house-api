@@ -36,7 +36,7 @@ class UserService:
             raise UserNotFoundByEmailError(credencials.email)
 
         # Comparación de contrasenia de las credenciales con la db
-        if self.password_hash.verify(user.password, credencials.password):
+        if self.password_hash.verify(credencials.password, user.password):
             return user
         raise CredencialsUserIncorrectError()
 
