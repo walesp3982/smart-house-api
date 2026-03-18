@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.depends.service import TokenJWTServiceDep, UserServiceDep
 from app.entities import User
-from app.exceptions import UserNotFoundByIdException
+from app.exceptions import UserNotFoundByIdError
 from app.schemas import Payload
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -41,7 +41,7 @@ def get_user_current(
     try:
         user = user_service.get_user_by_id(int(payload.sub))
         return user
-    except UserNotFoundByIdException:
+    except UserNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado",

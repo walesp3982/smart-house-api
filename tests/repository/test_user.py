@@ -3,7 +3,7 @@ import pytest
 
 from app.dto import UserDTO
 from app.entities import User
-from app.exceptions import DatabaseConstraintException, UserNotFoundException
+from app.exceptions import DatabaseConstraintException, UserNotFoundError
 
 
 def test_create_user(user_repo):
@@ -151,12 +151,12 @@ def test_raise_update_user_not_found(user_repo):
     user = user_repo.get_by_id(user_id)
     user_repo.delete(user.id)
 
-    with pytest.raises(UserNotFoundException):
+    with pytest.raises(UserNotFoundError):
         user_repo.update(user)
 
 
 def test_raise_delete_user_not_found(user_repo):
-    with pytest.raises(UserNotFoundException):
+    with pytest.raises(UserNotFoundError):
         user_repo.delete(1)
 
 

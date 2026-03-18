@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.dto import UserDTO
 from app.entities import User
-from app.exceptions import DatabaseConstraintException, UserNotFoundException
+from app.exceptions import DatabaseConstraintException, UserNotFoundError
 from app.models import users
 
 
@@ -54,13 +54,13 @@ class UserRepository:
         )
         result = self.connection.execute(query)
         if result.rowcount == 0:
-            raise UserNotFoundException(user.id)
+            raise UserNotFoundError(user.id)
 
     def delete(self, user_id: int) -> None:
         query = users.delete().where(users.c.id == user_id)
         result = self.connection.execute(query)
         if result.rowcount == 0:
-            raise UserNotFoundException(user_id)
+            raise UserNotFoundError(user_id)
 
     def create(self, user: UserDTO) -> int:
         query = (

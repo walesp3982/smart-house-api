@@ -5,8 +5,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.depends import UserServiceDep
 from app.exceptions import (
-    CredencialsUserIncorrectException,
-    UserNotFoundByEmailException,
+    CredencialsUserIncorrectError,
+    UserNotFoundByEmailError,
 )
 from app.schemas import CredencialsUser
 
@@ -28,13 +28,13 @@ def token(
     try:
         user = user_service.get_user_by_credencials(credencials)
         return {"access_token": user.email, "token_type": "bearer"}
-    except UserNotFoundByEmailException:
+    except UserNotFoundByEmailError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales incorrectas",
         )
 
-    except CredencialsUserIncorrectException:
+    except CredencialsUserIncorrectError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales incorrectas",
