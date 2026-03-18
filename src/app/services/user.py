@@ -2,6 +2,11 @@ from pwdlib import PasswordHash
 
 from app.dto import UserDTO
 from app.entities import User
+from app.exceptions import (
+    CredencialsUserIncorrect,
+    UserNotCreated,
+    UserNotFoundByEmailException,
+)
 from app.repository.interfaces import UserRepositoryProtocol
 from app.schemas import CredencialsUser
 
@@ -19,16 +24,16 @@ class UserService:
         user_id = self.repository.create(data)
         user = self.repository.get_by_id(user_id)
         if user is None:
-            raise Exception("El usuario no a podido ser creado")
+            raise UserNotCreated()
         return user
 
     def get_user_by_credencials(self, credencials: CredencialsUser) -> User:
         user = self.repository.get_by_email(credencials.email)
 
         if user is None:
-            raise Exception("User with email ... not found")
+            raise UserNotFoundByEmailException(credencials.email)
 
         # Comparación de contrasenia de las credenciales con la db
         if self.password_hash.verify(user.password, credencials.password):
             return user
-        raise Exception("Credenciales incorrectas")
+        raise CredencialsUserIncorrect()
