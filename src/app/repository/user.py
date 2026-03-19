@@ -1,7 +1,7 @@
 from sqlalchemy import Connection, insert, select
 from sqlalchemy.exc import IntegrityError
 
-from app.dto import CreateUserDTO
+from app.dto import UserCreateDTO
 from app.entities import UserEntity
 from app.exceptions import DatabaseConstraintException, UserNotFoundError
 from app.models import users
@@ -76,7 +76,7 @@ class UserRepository:
         if result.rowcount == 0:
             raise UserNotFoundError(user_id)
 
-    def create(self, user: CreateUserDTO) -> int:
+    def create(self, user: UserCreateDTO) -> int:
         query = insert(users).values(
             name=user.name, email=user.email, password=user.password
         )

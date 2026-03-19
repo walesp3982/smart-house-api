@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.depends import UserCurrentDep, UserServiceDep
-from app.dto import CreateUserDTO
+from app.dto import UserCreateDTO
 from app.exceptions import EmailAlreadyRegisterError
 from app.schemas import VisibleDataUser
 
@@ -9,7 +9,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register")
-def register(data: CreateUserDTO, user_service: UserServiceDep):
+def register(data: UserCreateDTO, user_service: UserServiceDep):
     try:
         user = user_service.create_user(data)
         return VisibleDataUser(**user.model_dump())
