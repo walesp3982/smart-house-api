@@ -28,6 +28,7 @@ class GeneralSettings(BaseSettings):
 
     debug: bool = False
     sql_debug: bool = False
+    cors_origins: set[str] = set()
 
 
 general_settings = GeneralSettings()
