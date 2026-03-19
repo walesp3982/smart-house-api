@@ -1,7 +1,7 @@
 from pwdlib import PasswordHash
 
-from app.dto import UserDTO
-from app.entities import User
+from app.dto import CreateUserDTO
+from app.entities import UserEntity
 from app.exceptions import (
     CredencialsUserIncorrectError,
     EmailAlreadyRegisterError,
@@ -18,7 +18,7 @@ class UserService:
         self.repository = repository
         self.password_hash = PasswordHash.recommended()
 
-    def create_user(self, data: UserDTO) -> User:
+    def create_user(self, data: CreateUserDTO) -> UserEntity:
         # Encriptación de contrasenia
         data.password = self.password_hash.hash(data.password)
 
@@ -29,7 +29,7 @@ class UserService:
             raise UserNotCreatedError()
         return user
 
-    def get_user_by_credencials(self, credencials: CredencialsUser) -> User:
+    def get_user_by_credencials(self, credencials: CredencialsUser) -> UserEntity:
         user = self.repository.get_by_email(credencials.email)
 
         if user is None:
@@ -40,13 +40,13 @@ class UserService:
             return user
         raise CredencialsUserIncorrectError()
 
-    def get_user_by_id(self, user_id: int) -> User:
+    def get_user_by_id(self, user_id: int) -> UserEntity:
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotFoundByIdError(user_id)
         return user
 
-    def register(self, user_dto: UserDTO) -> User:
+    def register(self, user_dto: CreateUserDTO) -> UserEntity:
 
         # Vemos que el usuario no exista en la db
         if self.repository.get_by_email(user_dto.email) is None:

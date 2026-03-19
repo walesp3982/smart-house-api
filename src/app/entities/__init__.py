@@ -1,3 +1,3 @@
-from .user import User
+from .user import UserEntity
 
-__all__ = ["User"]
+__all__ = ["UserEntity"]

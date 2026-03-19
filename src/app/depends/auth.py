@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.depends.service import TokenJWTServiceDep, UserServiceDep
-from app.entities import User
+from app.entities import UserEntity
 from app.exceptions import UserNotFoundByIdError
 from app.schemas import Payload
 
@@ -37,7 +37,7 @@ PayloadDep = Annotated[Payload, Depends(get_payload)]
 def get_user_current(
     payload: Annotated[Payload, Depends(get_payload)],
     user_service: UserServiceDep,
-) -> User:
+) -> UserEntity:
     try:
         user = user_service.get_user_by_id(int(payload.sub))
         return user
@@ -48,4 +48,4 @@ def get_user_current(
         )
 
 
-UserCurrentDep = Annotated[User, Depends(get_user_current)]
+UserCurrentDep = Annotated[UserEntity, Depends(get_user_current)]
