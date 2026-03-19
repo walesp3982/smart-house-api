@@ -10,3 +10,9 @@ class VisibleDataUser(BaseModel):
     id: int
     name: str
     email: EmailStr
+
+
+class UserRegisterRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str

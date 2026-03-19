@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pwdlib import PasswordHash
 
 from app.dto import UserCreateDTO
@@ -10,7 +12,7 @@ from app.exceptions import (
     UserNotFoundByIdError,
 )
 from app.repository.interfaces import UserRepositoryProtocol
-from app.schemas import CredencialsUser
+from app.schemas import CredencialsUser, UserRegisterRequest
 
 
 class UserService:
@@ -18,12 +20,21 @@ class UserService:
         self.repository = repository
         self.password_hash = PasswordHash.recommended()
 
-    def create_user(self, data: UserCreateDTO) -> UserEntity:
+    def create_user(self, data: UserRegisterRequest) -> UserEntity:
         # Encriptación de contrasenia
         data.password = self.password_hash.hash(data.password)
 
+        # Creación de UserCreateDTO en la db
+        user_create_dto = UserCreateDTO(
+            name=data.name,
+            email=data.email,
+            password=data.password,
+            is_verified=True,
+            verification_token="asdfasdf",
+            verification_token_expired_at=datetime.now(),
+        )
         # Creación del usuario en la db
-        user_id = self.repository.create(data)
+        user_id = self.repository.create(user_create_dto)
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotCreatedError()

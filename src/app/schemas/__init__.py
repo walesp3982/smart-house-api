@@ -1,4 +1,9 @@
 from .auth import Payload
-from .user import CredencialsUser, VisibleDataUser
+from .user import CredencialsUser, UserRegisterRequest, VisibleDataUser
 
-__all__ = ["CredencialsUser", "Payload", "VisibleDataUser"]
+__all__ = [
+    "CredencialsUser",
+    "Payload",
+    "VisibleDataUser",
+    "UserRegisterRequest",
+]

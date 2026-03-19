@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -8,5 +9,5 @@ class UserCreateDTO(BaseModel):
     email: EmailStr
     password: str
     is_verified: bool
-    verification_token: str
-    verification_token_expired_at: datetime
+    verification_token: Optional[str]
+    verification_token_expired_at: Optional[datetime]

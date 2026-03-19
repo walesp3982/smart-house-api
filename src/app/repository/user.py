@@ -25,7 +25,7 @@ class UserRepository:
                 password=row.password,
                 is_verified=row.is_verified,
                 verification_token=row.verification_token,
-                verification_token_expired_at=row.verication_token_expired_at,
+                verification_token_expired_at=row.verification_token_expired_at,
             )
             for row in result.fetchall()
         ]
@@ -41,7 +41,7 @@ class UserRepository:
                 password=result.password,
                 is_verified=result.is_verified,
                 verification_token=result.verification_token,
-                verification_token_expired_at=result.verication_token_expired_at,
+                verification_token_expired_at=result.verification_token_expired_at,
             )
         return None
 
@@ -56,7 +56,7 @@ class UserRepository:
                 password=result.password,
                 is_verified=result.is_verified,
                 verification_token=result.verification_token,
-                verification_token_expired_at=result.verication_token_expired_at,
+                verification_token_expired_at=result.verification_token_expired_at,
             )
         return None
 
@@ -78,7 +78,12 @@ class UserRepository:
 
     def create(self, user: UserCreateDTO) -> int:
         query = insert(users).values(
-            name=user.name, email=user.email, password=user.password
+            name=user.name,
+            email=user.email,
+            password=user.password,
+            is_verified=user.is_verified,
+            verification_token=user.verification_token,
+            verification_token_expired_at=user.verification_token_expired_at,
         )
         try:
             result = self.connection.execute(query)
