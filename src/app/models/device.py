@@ -24,6 +24,4 @@ devices = Table(
     Column("device_id", String(64), nullable=False),
     Column("area_id", ForeignKey("areas.id"), nullable=True),
     Column("type", Enum(DeviceType), nullable=False),
-    Column("mqtt_username", String(64), nullable=False),
-    Column("mqtt_password", String(64), nullable=False),
 )
