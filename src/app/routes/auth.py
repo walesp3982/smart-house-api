@@ -8,7 +8,7 @@ from app.exceptions import (
     CredencialsUserIncorrectError,
     UserNotFoundByEmailError,
 )
-from app.schemas import CredencialsUser
+from app.schemas import CredencialsUserResponse
 from app.schemas.auth import Token
 
 router = APIRouter()
@@ -21,7 +21,7 @@ def token(
     jwt_service: TokenJWTServiceDep,
 ):
     # Creamos las credenciales
-    credencials = CredencialsUser(
+    credencials = CredencialsUserResponse(
         email=form_data.username,
         password=form_data.password,
     )

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 
 
-class CredencialsUser(BaseModel):
+class CredencialsUserResponse(BaseModel):
     email: EmailStr
     password: str
 

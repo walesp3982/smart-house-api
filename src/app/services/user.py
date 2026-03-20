@@ -1,4 +1,5 @@
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta, timezone
 
 from pwdlib import PasswordHash
 
@@ -12,27 +13,81 @@ from app.exceptions import (
     UserNotFoundByIdError,
 )
 from app.repository.interfaces import UserRepositoryProtocol
-from app.schemas import CredencialsUser, UserRegisterRequest
+from app.schemas import CredencialsUserResponse, UserRegisterRequest
+from app.settings import general_settings
 
 
 class UserService:
+    """
+    Clase que administra toda la lógica de negocio que
+    tiene el Usuario
+    """
+
     def __init__(self, repository: UserRepositoryProtocol):
         self.repository = repository
         self.password_hash = PasswordHash.recommended()
 
+    @staticmethod
+    def generate_token(dto: UserCreateDTO):
+        """
+        Modifica un dto ya existente para agregar el token de verificación
+        y la fecha de expiration del token
+
+        Args:
+            dto: clase transportadora perteneciente a UserCreateDTO a
+            modificarse
+
+        Returns:
+            No retorna nada :)
+        """
+        dto.verification_token = secrets.token_urlsafe(32)
+        dto.verification_token_expired_at = datetime.now(timezone.utc) - timedelta(
+            minutes=general_settings.expiration_minutes_email_verification
+        )
+
+    @staticmethod
+    def set_validation_user(user_create_dto: UserCreateDTO):
+        """
+        Configuramos la validation del usuario en un user_create_dto
+
+
+        Args:
+            user_create_dto: clase transportadora perteneciente
+            a UserCreateDTO que va a ser modificada
+
+        Returns:
+            No retorna nada
+
+
+        Nota:
+            Para configurar la validación de email usar las variables
+            de entorno de general_settings
+        """
+        if general_settings.validation_email:
+            UserService.generate_token(user_create_dto)
+            user_create_dto.is_verified = False
+        else:
+            user_create_dto.is_verified = True
+
     def create_user(self, data: UserRegisterRequest) -> UserEntity:
+        # Verificamos que el usuario no esté en la db
+        if self.repository.get_by_email(data.email.lower()) is None:
+            raise EmailAlreadyRegisterError
+
         # Encriptación de contrasenia
         data.password = self.password_hash.hash(data.password)
 
-        # Creación de UserCreateDTO en la db
+        # Creación de UserCreateDTO
         user_create_dto = UserCreateDTO(
             name=data.name,
-            email=data.email,
+            email=data.email.lower(),
             password=data.password,
-            is_verified=True,
-            verification_token="asdfasdf",
-            verification_token_expired_at=datetime.now(),
+            is_verified=False,
         )
+
+        # Creamos la verificación (Se modifica según variable de entorno)
+        self.set_validation_user(user_create_dto)
+
         # Creación del usuario en la db
         user_id = self.repository.create(user_create_dto)
         user = self.repository.get_by_id(user_id)
@@ -40,7 +95,9 @@ class UserService:
             raise UserNotCreatedError()
         return user
 
-    def get_user_by_credencials(self, credencials: CredencialsUser) -> UserEntity:
+    def get_user_by_credencials(
+        self, credencials: CredencialsUserResponse
+    ) -> UserEntity:
         user = self.repository.get_by_email(credencials.email)
 
         if user is None:
@@ -56,14 +113,3 @@ class UserService:
         if user is None:
             raise UserNotFoundByIdError(user_id)
         return user
-
-    def register(self, user_dto: UserCreateDTO) -> UserEntity:
-
-        # Vemos que el usuario no exista en la db
-        if self.repository.get_by_email(user_dto.email) is None:
-            raise EmailAlreadyRegisterError
-
-        # Creamos el usuario
-        user_id = self.repository.create(user_dto)
-
-        return self.get_user_by_id(user_id)

@@ -29,6 +29,10 @@ class GeneralSettings(BaseSettings):
     debug: bool = False
     sql_debug: bool = False
     cors_origins: set[str] = set()
+    validation_email: bool = False
+    expiration_minutes_email_verification: int = (
+        120  # 2 horas para tener válidar el expiration minutes
+    )
 
 
 general_settings = GeneralSettings()
