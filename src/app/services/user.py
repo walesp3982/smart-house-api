@@ -2,6 +2,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from pwdlib import PasswordHash
+from pydantic import NameEmail
 
 from app.dto import UserCreateDTO
 from app.entities import UserEntity
@@ -17,6 +18,8 @@ from app.repository.interfaces import UserRepositoryProtocol
 from app.schemas import CredencialsUserRequest, UserRegisterRequest
 from app.settings import general_settings
 
+from .email import EmailContentEnum, EmailSender, FactoryEmailContent
+
 
 class UserService:
     """
@@ -27,6 +30,7 @@ class UserService:
     def __init__(self, repository: UserRepositoryProtocol):
         self.repository = repository
         self.password_hash = PasswordHash.recommended()
+        self.email_sender = EmailSender()
 
     @staticmethod
     def generate_token(dto: UserCreateDTO):
@@ -70,7 +74,41 @@ class UserService:
         else:
             user_create_dto.is_verified = True
 
+    async def send_email_verification(self, user: UserEntity, url_verification: str):
+        """
+        Enviamos una verificación de email
+
+        Args:
+        user: UserEntity necesario para sacar las variables
+        url_verificación: url relativo
+        """
+        if not user.is_verified:
+            content = FactoryEmailContent.create(
+                type=EmailContentEnum.verification,
+                url=url_verification,
+                name=user.name,
+            ).generate()
+            await self.email_sender.execute(
+                html=content,
+                email_address=[NameEmail(name=user.name, email=user.name)],
+            )
+
     def create_user(self, data: UserRegisterRequest) -> UserEntity:
+        """
+        Crea un usuario dentro de la base de datos
+
+        Args:
+            data: UserRegisterRequest con información
+            necesaria para crear el usuario
+
+        Returns:
+            UserEntity: Domain del usuario
+
+        Nota:
+        -   Se revisa que el email no haya sido registrado anteriormente
+        -   Aquí se hashea la password antes de guardarla en el Repositorio
+
+        """
         # Verificamos que el usuario no esté en la db
         if self.repository.get_by_email(data.email.lower()) is None:
             raise EmailAlreadyRegisterError
@@ -94,11 +132,38 @@ class UserService:
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotCreatedError()
+
+        return user
+
+    async def register_user(self, data: UserRegisterRequest, url: str) -> UserEntity:
+        """
+        Guardamos el usuario en el Repositorio y mandamos un email de confirmación
+        (Depende de las variables de entorno)
+
+        Args:
+        data: Request que se procesa en el Servicio
+        url: url relativa para verificar el email
+        """
+        user = self.create_user(data)
+        await self.send_email_verification(user, url)
         return user
 
     def get_user_by_credencials(
         self, credencials: CredencialsUserRequest
     ) -> UserEntity:
+        """
+        Obtener el usuario mediante las credenciales
+
+        Args:
+        credencials: email y password para verificar el usuario
+
+        Returns:
+        - UserEntity: almacenada anteriormente en la DB
+
+        Note:
+        - Si el email no existe se manda una Exception
+        - Si la password no coincide con la DB se lanza una Exception
+        """
         user = self.repository.get_by_email(credencials.email)
 
         if user is None:
@@ -110,12 +175,18 @@ class UserService:
         raise CredencialsUserIncorrectError()
 
     def get_user_by_id(self, user_id: int) -> UserEntity:
+        """
+        Obtenemos un Usuario mediante el user_id
+        """
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotFoundByIdError(user_id)
         return user
 
     def verified(self, token: str) -> None:
+        """
+        Verificamos al usuario mediante el token
+        """
         user = self.repository.get_by_token(str)
         if user is None:
             raise UserNotFoundByEmailError(token)
@@ -126,6 +197,9 @@ class UserService:
         user.is_verified = True
 
     def user_is_verified(self, user_id: int) -> bool:
+        """
+        Vemos que el usuario esté verificado
+        """
         user = self.repository.get_by_id(user_id)
         if user is None:
             raise UserNotFoundError(user_id)

@@ -12,9 +12,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register")
-def register(data: UserRegisterRequest, user_service: UserServiceDep):
+async def register(
+    data: UserRegisterRequest, user_service: UserServiceDep, response: Response
+):
     try:
-        user = user_service.create_user(data)
+        user = await user_service.register_user(data, "/users/email-verification/")
         return VisibleDataUserResponse(**user.model_dump())
     except EmailAlreadyRegisterError:
         HTTPException(
