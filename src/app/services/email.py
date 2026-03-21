@@ -1,7 +1,53 @@
+from abc import ABC, abstractmethod
+from enum import StrEnum
+
 from fastapi_mail import FastMail, MessageSchema, MessageType
+from jinja2 import Environment, FileSystemLoader
 from pydantic import NameEmail
 
 from app.settings import connection_config_email, general_settings
+
+DIR_TEMPLATES = "templates/"
+
+
+class EmailContentBuilder(ABC):
+    def __init__(self):
+        self.enviroment = Environment(loader=FileSystemLoader(DIR_TEMPLATES))
+
+    @abstractmethod
+    def generate(self) -> str: ...
+
+
+class VerificationEmailBuilder(EmailContentBuilder):
+    def __init__(self, url: str, name: str) -> None:
+        super().__init__()
+        self.url = url
+        self.name = name
+
+    def generate(self) -> str:
+        template = self.enviroment.get_template("verification.html")
+
+        # /users/email-verification/{token}
+        content = template.render(
+            {
+                "url": self.url,
+                "name": self.name,
+            }
+        )
+        return content
+
+
+class EmailContentEnum(StrEnum):
+    verification = "verification"
+
+
+class FactoryEmailContent:
+    @staticmethod
+    def create(type: EmailContentEnum, **kwargs) -> EmailContentBuilder:
+        match type:
+            case EmailContentEnum.verification:
+                return VerificationEmailBuilder(**kwargs)
+        return ValueError()
 
 
 class EmailSender:

@@ -8,7 +8,7 @@ class EmailSettings(BaseSettings):
     PORT: int
     USERNAME: str
     PASSWORD: str
-    STARTTTS: bool
+    STARTTLS: bool
     SSL_TLS: bool
 
     model_config = SettingsConfigDict(
@@ -24,6 +24,6 @@ connection_config_email = ConnectionConfig(
     MAIL_SSL_TLS=email_settings.SSL_TLS,
     MAIL_SERVER=email_settings.SERVER,
     MAIL_PORT=email_settings.PORT,
-    MAIL_STARTTLS=email_settings.STARTTTS,
+    MAIL_STARTTLS=email_settings.STARTTLS,
     MAIL_FROM=email_settings.USERNAME,
 )
