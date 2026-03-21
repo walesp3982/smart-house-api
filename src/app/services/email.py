@@ -27,7 +27,7 @@ class VerificationEmailBuilder(EmailContentBuilder):
         self.name = name
 
     def generate(self) -> str:
-        template = self.enviroment.get_template("verification.html")
+        template = self.enviroment.get_template("email/verify_email.html")
 
         # /users/email-verification/{token}
         content = template.render(
