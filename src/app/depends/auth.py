@@ -49,3 +49,11 @@ def get_user_current(
 
 
 UserCurrentDep = Annotated[UserEntity, Depends(get_user_current)]
+
+
+def get_user_verified(current_user: UserCurrentDep) -> UserEntity:
+    if not current_user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified"
+        )
+    return current_user

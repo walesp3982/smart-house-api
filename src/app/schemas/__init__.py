@@ -1,9 +1,15 @@
 from .auth import Payload
-from .user import CredencialsUserResponse, UserRegisterRequest, VisibleDataUser
+from .user import (
+    CredencialsUserRequest,
+    UserRegisterRequest,
+    UserVerifiedStatusResponse,
+    VisibleDataUserResponse,
+)
 
 __all__ = [
-    "CredencialsUserResponse",
+    "CredencialsUserRequest",
     "Payload",
-    "VisibleDataUser",
+    "VisibleDataUserResponse",
     "UserRegisterRequest",
+    "UserVerifiedStatusResponse",
 ]

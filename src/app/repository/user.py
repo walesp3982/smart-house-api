@@ -90,3 +90,12 @@ class UserRepository:
             return result.lastrowid
         except IntegrityError as e:
             raise DatabaseConstraintException(str(e.orig))
+
+    def get_by_token(self, token: str) -> UserEntity | None:
+        query = select(users).where(users.c.verification_token == token)
+
+        result = self.connection.execute(query)
+
+        if result:
+            return UserEntity(**result.__dict__)
+        return None

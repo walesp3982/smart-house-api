@@ -11,9 +11,10 @@ from app.exceptions import (
     UserNotCreatedError,
     UserNotFoundByEmailError,
     UserNotFoundByIdError,
+    UserNotFoundError,
 )
 from app.repository.interfaces import UserRepositoryProtocol
-from app.schemas import CredencialsUserResponse, UserRegisterRequest
+from app.schemas import CredencialsUserRequest, UserRegisterRequest
 from app.settings import general_settings
 
 
@@ -96,7 +97,7 @@ class UserService:
         return user
 
     def get_user_by_credencials(
-        self, credencials: CredencialsUserResponse
+        self, credencials: CredencialsUserRequest
     ) -> UserEntity:
         user = self.repository.get_by_email(credencials.email)
 
@@ -113,3 +114,20 @@ class UserService:
         if user is None:
             raise UserNotFoundByIdError(user_id)
         return user
+
+    def verified(self, token: str) -> None:
+        user = self.repository.get_by_token(str)
+        if user is None:
+            raise UserNotFoundByEmailError(token)
+        if user.verification_token_expired_at is None:
+            raise Exception()
+        if datetime.now(timezone.utc) < user.verification_token_expired_at:
+            raise Exception()
+        user.is_verified = True
+
+    def user_is_verified(self, user_id: int) -> bool:
+        user = self.repository.get_by_id(user_id)
+        if user is None:
+            raise UserNotFoundError(user_id)
+
+        return user.is_verified
