@@ -10,7 +10,8 @@ class EmailSettings(BaseSettings):
     PASSWORD: str
     STARTTLS: bool
     SSL_TLS: bool
-
+    USE_CREDENTIALS: bool
+    FROM: str
     model_config = SettingsConfigDict(
         env_file=".env", env_prefix="EMAIL_", extra="ignore"
     )
@@ -25,5 +26,6 @@ connection_config_email = ConnectionConfig(
     MAIL_SERVER=email_settings.SERVER,
     MAIL_PORT=email_settings.PORT,
     MAIL_STARTTLS=email_settings.STARTTLS,
-    MAIL_FROM=email_settings.USERNAME,
+    MAIL_FROM=email_settings.FROM,
+    USE_CREDENTIALS=email_settings.USE_CREDENTIALS,
 )

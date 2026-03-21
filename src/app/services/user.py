@@ -15,9 +15,11 @@ from app.exceptions import (
     UserNotFoundByIdError,
     UserNotFoundError,
 )
+from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
 from app.repository.interfaces import UserRepositoryProtocol
 from app.schemas import CredencialsUserRequest, UserRegisterRequest
 from app.settings import general_settings
+from app.settings.time import normalize, utcnow
 
 from .email import EmailContentEnum, EmailSender, FactoryEmailContent
 
@@ -86,9 +88,10 @@ class UserService:
         if not user.is_verified:
             if user.verification_token is None:
                 raise Exception("No se encontró el token de verificacion")
-            host = general_settings.app_host
+            host = str(general_settings.app_host).rstrip("/")
+            url_verification = url_verification.lstrip("/").rstrip("/")
             safe_token = quote(user.verification_token, safe="")
-            final_url = f"{str(host).rsplit('/')}/{url_verification}/{safe_token}"
+            final_url = f"{str(host)}/{url_verification}/{safe_token}"
             content = FactoryEmailContent.create(
                 type=EmailContentEnum.verification,
                 url=final_url,
@@ -96,7 +99,7 @@ class UserService:
             ).generate()
             await self.email_sender.execute(
                 html=content,
-                email_address=[NameEmail(name=user.name, email=user.name)],
+                email_address=[NameEmail(name=user.name, email=user.email)],
             )
 
     def create_user(self, data: UserRegisterRequest) -> UserEntity:
@@ -116,7 +119,7 @@ class UserService:
 
         """
         # Verificamos que el usuario no esté en la db
-        if self.repository.get_by_email(data.email.lower()) is None:
+        if self.repository.get_by_email(data.email.lower()) is not None:
             raise EmailAlreadyRegisterError
 
         # Encriptación de contrasenia
@@ -193,14 +196,15 @@ class UserService:
         """
         Verificamos al usuario mediante el token
         """
-        user = self.repository.get_by_token(str)
+        user = self.repository.get_by_token(token)
         if user is None:
-            raise UserNotFoundByEmailError(token)
+            raise UserNotFoundByToken()
         if user.verification_token_expired_at is None:
-            raise Exception()
-        if datetime.now(timezone.utc) < user.verification_token_expired_at:
-            raise Exception()
+            raise VerificationEmailInvalid()
+        if utcnow() < normalize(user.verification_token_expired_at):
+            raise VerificationEmailInvalid()
         user.is_verified = True
+        self.repository.update(user)
 
     def user_is_verified(self, user_id: int) -> bool:
         """

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import StrEnum
+from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from jinja2 import Environment, FileSystemLoader
@@ -7,12 +8,13 @@ from pydantic import NameEmail
 
 from app.settings import connection_config_email, general_settings
 
-DIR_TEMPLATES = "templates/"
+BASE_DIR = Path(__file__).resolve().parent
+DIR_TEMPLATES = "templates"
 
 
 class EmailContentBuilder(ABC):
     def __init__(self):
-        self.enviroment = Environment(loader=FileSystemLoader(DIR_TEMPLATES))
+        self.enviroment = Environment(loader=FileSystemLoader(BASE_DIR / DIR_TEMPLATES))
 
     @abstractmethod
     def generate(self) -> str: ...

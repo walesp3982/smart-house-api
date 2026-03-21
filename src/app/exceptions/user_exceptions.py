@@ -26,3 +26,13 @@ class UserNotCreatedError(Exception):
 class UserNotFoundByIdError(Exception):
     def __init__(self, id: int) -> None:
         super().__init__(f"No se encontró el usuario con id {id}")
+
+
+class UserNotFoundByToken(Exception):
+    def __init__(self) -> None:
+        super().__init__("Usuario no encontrado")
+
+
+class VerificationEmailInvalid(Exception):
+    def __init__(self) -> None:
+        super().__init__("Verificación de email inválida")

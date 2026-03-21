@@ -61,11 +61,7 @@ class UserRepository:
         return None
 
     def update(self, user: UserEntity) -> None:
-        query = (
-            users.update()
-            .where(users.c.id == user.id)
-            .values(name=user.name, email=user.email, password=user.password)
-        )
+        query = users.update().where(users.c.id == user.id).values(user.model_dump())
         result = self.connection.execute(query)
         if result.rowcount == 0:
             raise UserNotFoundError(user.id)
@@ -94,8 +90,9 @@ class UserRepository:
     def get_by_token(self, token: str) -> UserEntity | None:
         query = select(users).where(users.c.verification_token == token)
 
-        result = self.connection.execute(query)
+        rows = self.connection.execute(query).fetchone()
 
-        if result:
-            return UserEntity(**result.__dict__)
-        return None
+        if rows is None:
+            return None
+
+        return UserEntity(**rows._mapping)
