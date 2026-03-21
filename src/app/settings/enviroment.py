@@ -25,7 +25,6 @@ database_settings = DatabaseSettings()  # pyright: ignore[reportCallIssue]
 
 class GeneralSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
     debug: bool = False
     sql_debug: bool = False
     cors_origins: set[str] = set()
@@ -33,6 +32,7 @@ class GeneralSettings(BaseSettings):
     expiration_minutes_email_verification: int = (
         120  # 2 horas para tener válidar el expiration minutes
     )
+    app_name: str = "Application"
 
 
 general_settings = GeneralSettings()
