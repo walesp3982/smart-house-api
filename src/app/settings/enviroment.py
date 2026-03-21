@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+from pydantic import AnyUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -32,10 +33,11 @@ class GeneralSettings(BaseSettings):
     expiration_minutes_email_verification: int = (
         120  # 2 horas para tener válidar el expiration minutes
     )
+    app_host: AnyUrl = AnyUrl("http://localhost:8000")
     app_name: str = "Application"
 
 
-general_settings = GeneralSettings()
+general_settings = GeneralSettings()  # pyright: ignore[reportCallIssue]
 
 
 class JWTSettings(BaseSettings):

@@ -1,5 +1,6 @@
 import secrets
 from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 
 from pwdlib import PasswordHash
 from pydantic import NameEmail
@@ -83,9 +84,14 @@ class UserService:
         url_verificación: url relativo
         """
         if not user.is_verified:
+            if user.verification_token is None:
+                raise Exception("No se encontró el token de verificacion")
+            host = general_settings.app_host
+            safe_token = quote(user.verification_token, safe="")
+            final_url = f"{str(host).rsplit('/')}/{url_verification}/{safe_token}"
             content = FactoryEmailContent.create(
                 type=EmailContentEnum.verification,
-                url=url_verification,
+                url=final_url,
                 name=user.name,
             ).generate()
             await self.email_sender.execute(
