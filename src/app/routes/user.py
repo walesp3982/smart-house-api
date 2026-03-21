@@ -1,24 +1,50 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 
 from app.depends import UserCurrentDep, UserServiceDep
-from app.dto import UserDTO
 from app.exceptions import EmailAlreadyRegisterError
-from app.schemas import VisibleDataUser
+from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
+from app.schemas import (
+    UserRegisterRequest,
+    UserVerifiedStatusResponse,
+    VisibleDataUserResponse,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register")
-def register(data: UserDTO, user_service: UserServiceDep):
+async def register(data: UserRegisterRequest, user_service: UserServiceDep):
     try:
-        user = user_service.create_user(data)
-        return VisibleDataUser(**user.model_dump())
+        user = await user_service.register_user(data, "/users/email-verification/")
+        return VisibleDataUserResponse(**user.model_dump())
     except EmailAlreadyRegisterError:
-        HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email ya registrado"
         )
 
 
 @router.post("/me")
-def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUser:
-    return VisibleDataUser(**actual_user.model_dump())
+def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
+    return VisibleDataUserResponse(**actual_user.model_dump())
+
+
+@router.get("/verified")
+def get_verified_user(user_id: int, user_service: UserServiceDep):
+    is_verified = user_service.user_is_verified(user_id)
+    return UserVerifiedStatusResponse(status=is_verified)
+
+
+@router.get("/email-verification/{token}")
+def confirm_email(token: str, user_service: UserServiceDep):
+    try:
+        user_service.verified(token)
+        Response(status_code=status.HTTP_204_NO_CONTENT)
+    except VerificationEmailInvalid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Validación de email inválida",
+        )
+    except UserNotFoundByToken:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Token inválido"
+        )

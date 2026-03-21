@@ -8,3 +8,8 @@ class Payload(BaseModel):
     name: str
     exp: datetime
     iat: datetime
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

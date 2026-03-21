@@ -1,0 +1,16 @@
+{% macro button(url, text) %}
+<div style="text-align: center; margin: 32px 0;">
+  <a href="{{ url }}" style="display: inline-block; background: #3182ce; color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: bold; letter-spacing: 1px;">
+    {{ text }}
+  </a>
+</div>
+{% endmacro %}
+
+{% macro link_fallback(url) %}
+<p style="color: #718096; font-size: 14px;">Si el botón no funciona, copia y pega el siguiente enlace:</p>
+<div style="word-break: break-all; color: #3182ce; font-size: 13px; margin-bottom: 24px;">{{ url }}</div>
+{% endmacro %}
+
+{% macro warning(text) %}
+<p style="color: #a0aec0; font-size: 13px;">{{ text }}</p>
+{% endmacro %}

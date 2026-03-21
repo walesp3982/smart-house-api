@@ -1,4 +1,5 @@
 from .database import get_url_database
+from .email import connection_config_email
 from .enviroment import (
     AvailableDatabases,
     database_settings,
@@ -14,4 +15,5 @@ __all__ = [
     "general_settings",
     "get_logger_path",
     "jwt_settings",
+    "connection_config_email",
 ]

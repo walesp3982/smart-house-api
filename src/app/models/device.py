@@ -21,9 +21,7 @@ devices = Table(
     Column("name", String(50), nullable=False),
     Column("house_id", ForeignKey("houses.id"), nullable=False),
     # Identificador del dispositivo en el hardware
-    Column("device_id", String(64), nullable=False),
+    Column("device_uuid", String(64), nullable=False),
     Column("area_id", ForeignKey("areas.id"), nullable=True),
     Column("type", Enum(DeviceType), nullable=False),
-    Column("mqtt_username", String(64), nullable=False),
-    Column("mqtt_password", String(64), nullable=False),
 )

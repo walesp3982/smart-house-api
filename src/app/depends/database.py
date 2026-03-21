@@ -1,6 +1,6 @@
 from typing import Annotated, Any, Generator
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
 
 from app.models import engine
@@ -9,7 +9,14 @@ from app.repository import UserRepository
 
 def get_connection() -> Generator[Connection, Any, Any]:
     with engine.begin() as conn:
-        yield conn
+        try:
+            yield conn
+        except HTTPException:
+            raise
+        # Solo hace rollback en error inesperados 505
+        except Exception:
+            conn.rollback()
+            raise
 
 
 ConnectionDep = Annotated[Connection, Depends(get_connection)]

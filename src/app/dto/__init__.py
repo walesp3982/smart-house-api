@@ -1,3 +1,3 @@
-from .user import UserDTO
+from .user import UserCreateDTO
 
-__all__ = ["UserDTO"]
+__all__ = ["UserCreateDTO"]

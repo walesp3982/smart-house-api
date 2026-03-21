@@ -5,6 +5,7 @@ from .user_exceptions import (
     UserNotCreatedError,
     UserNotFoundByEmailError,
     UserNotFoundByIdError,
+    UserNotFoundByToken,
     UserNotFoundError,
 )
 
@@ -16,4 +17,5 @@ __all__ = [
     "UserNotCreatedError",
     "UserNotFoundByIdError",
     "EmailAlreadyRegisterError",
+    "UserNotFoundByToken",
 ]
