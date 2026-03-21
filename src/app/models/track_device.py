@@ -14,7 +14,11 @@ track_devices = Table(
     "track_devices",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("device_id", ForeignKey("devices.id"), nullable=False),
+    Column(
+        "device_id",
+        ForeignKey("devices.id", name="fk_track_devices_device_id"),
+        nullable=False,
+    ),
     Column("status", Enum(StatusDevice), nullable=False),
     Column("timestamp", TIMESTAMP, nullable=False),
 )
