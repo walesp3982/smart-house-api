@@ -3,25 +3,27 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class SMTPSettings(BaseSettings):
+class EmailSettings(BaseSettings):
     SERVER: str
-    PORT_TLS: int
+    PORT: int
     USERNAME: str
     PASSWORD: str
+    STARTTTS: bool
+    SSL_TLS: bool
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_prefix="SMTP_", extra="ignore"
+        env_file=".env", env_prefix="EMAIL_", extra="ignore"
     )
 
 
-smtp_settings = SMTPSettings()  # pyright: ignore[reportCallIssue]
+email_settings = EmailSettings()  # pyright: ignore[reportCallIssue]
 
-connection_config_smtp = ConnectionConfig(
-    MAIL_USERNAME=smtp_settings.USERNAME,
-    MAIL_PASSWORD=SecretStr(smtp_settings.PASSWORD),
-    MAIL_SSL_TLS=False,
-    MAIL_SERVER=smtp_settings.SERVER,
-    MAIL_PORT=smtp_settings.PORT_TLS,
-    MAIL_STARTTLS=True,
-    MAIL_FROM=smtp_settings.USERNAME,
+connection_config_email = ConnectionConfig(
+    MAIL_USERNAME=email_settings.USERNAME,
+    MAIL_PASSWORD=SecretStr(email_settings.PASSWORD),
+    MAIL_SSL_TLS=email_settings.SSL_TLS,
+    MAIL_SERVER=email_settings.SERVER,
+    MAIL_PORT=email_settings.PORT,
+    MAIL_STARTTLS=email_settings.STARTTTS,
+    MAIL_FROM=email_settings.USERNAME,
 )
