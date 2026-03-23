@@ -3,13 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.depends import TokenJWTServiceDep, UserServiceDep
+from app.api.depends import TokenJWTServiceDep, UserServiceDep
+from app.api.schemas import CredencialsUserRequest
+from app.api.schemas.auth import Token
 from app.exceptions import (
     CredencialsUserIncorrectError,
     UserNotFoundByEmailError,
 )
-from app.schemas import CredencialsUserRequest
-from app.schemas.auth import Token
 
 router = APIRouter()
 
@@ -30,6 +30,10 @@ def token(
     try:
         user = user_service.get_user_by_credencials(credencials)
 
+        if user.id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
         token = jwt_service.encode(user.id, user.name)
         return Token(access_token=token, token_type="Bearer")
     except UserNotFoundByEmailError:

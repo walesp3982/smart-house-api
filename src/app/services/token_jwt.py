@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 
-from app.schemas import Payload
+from app.api.schemas import Payload
 from app.settings import jwt_settings
 
 

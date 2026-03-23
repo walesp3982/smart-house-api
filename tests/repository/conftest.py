@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 
-from app.models import metadata
+from app.infraestructure.models import metadata
 from app.repository import DeviceRepository, UserRepository
 
 

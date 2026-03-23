@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from app.entities import DeviceEntity
 from app.exceptions.database_exceptions import DatabaseConstraintException
 from app.exceptions.device_exception import DeviceNotFoundByIdError
-from app.models import devices
+from app.infraestructure.models import devices
 
 
 class DeviceRepository:

@@ -1,9 +1,9 @@
 from pwdlib import PasswordHash
 
+from app.api.schemas.device import CreateDeviceRequest
 from app.entities import DeviceEntity
 from app.exceptions.device_exception import DeviceDuplicateUUIDError
 from app.repository.interfaces import DeviceRepositoryProtocol
-from app.schemas.device import CreateDeviceRequest
 
 
 class DeviceService:

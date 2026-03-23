@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.depends.database import DeviceRepositoryDep, UserRepositoryDep
+from app.api.depends.database import DeviceRepositoryDep, UserRepositoryDep
 from app.services import DeviceService, TokenJWTService, UserService
 
 

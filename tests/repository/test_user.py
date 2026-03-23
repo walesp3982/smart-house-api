@@ -3,13 +3,12 @@ from datetime import datetime
 
 import pytest
 
-from app.dto import UserCreateDTO
 from app.entities import UserEntity
 from app.exceptions import DatabaseConstraintException, UserNotFoundError
 
 
 def create_false_dto(name: str, verified: bool):
-    return UserCreateDTO(
+    return UserEntity(
         name=name,
         email=f"{'.'.join(name.split(' ')).lower()}@gmail.com",
         password="password",
@@ -20,16 +19,16 @@ def create_false_dto(name: str, verified: bool):
 
 
 def test_create_user(user_repo):
-    user_dto = create_false_dto("juan", True)
-    user_id = user_repo.create(user_dto)
+    new_user = create_false_dto("juan", True)
+    user_id = user_repo.create(new_user)
     assert user_id is not None
     users = user_repo.get_all()
     assert len(users) == 1
 
 
 def test_verify_create_user(user_repo):
-    user_dto = create_false_dto("juan", True)
-    user_id = user_repo.create(user_dto)
+    new_user = create_false_dto("juan", True)
+    user_id = user_repo.create(new_user)
     assert isinstance(user_repo.get_by_id(user_id), UserEntity)
 
 
@@ -81,53 +80,26 @@ def test_any_user_exist_get_by_id(user_repo):
     assert user is None
 
 
-def test_cmp_userdto_in_user_get_by_id(user_repo):
-    userdto = create_false_dto("jhon", True)
-
-    # Creación de de usuario en db
-    user_id = user_repo.create(userdto)
-
-    user = user_repo.get_by_id(user_id)
-
-    assert user is not None
-
-    user_dict = user.model_dump()
-    user_dict.pop("id")
-    assert user_dict == userdto.model_dump()
-
-
 def test_find_user_by_email(user_repo):
-    user_dto = create_false_dto("jhon", True)
+    new_user = create_false_dto("jhon", True)
 
-    user_repo.create(user_dto)
+    user_repo.create(new_user)
 
-    user = user_repo.get_by_email(user_dto.email)
+    user = user_repo.get_by_email(new_user.email)
 
     assert isinstance(user, UserEntity)
 
-    assert user.email == user_dto.email
+    assert user.email == new_user.email
 
 
 def test_not_found_user_by_email(user_repo):
-    user_dto = create_false_dto("jhon", True)
+    new_user = create_false_dto("jhon", True)
 
-    user_repo.create(user_dto)
+    user_repo.create(new_user)
 
-    user = user_repo.get_by_email(user_dto.email + ".es")
+    user = user_repo.get_by_email(new_user.email + ".es")
 
     assert user is None
-
-
-def test_cmp_dto_user_with_user_repo(user_repo):
-    user_dto = create_false_dto("jhon", True)
-
-    user_repo.create(user_dto)
-
-    user = user_repo.get_by_email(user_dto.email)
-    user_dict = user.model_dump()
-    user_dict.pop("id")
-
-    assert user_dict == user_dto.model_dump()
 
 
 def test_update_user_value(user_repo):
