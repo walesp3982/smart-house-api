@@ -89,7 +89,6 @@ def upgrade() -> None:
         "installed_device",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(length=50), nullable=False),
-        sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("device_id", sa.Integer(), nullable=False),
         sa.Column("house_id", sa.Integer(), nullable=False),
         sa.Column("area_id", sa.Integer(), nullable=True),
@@ -104,10 +103,6 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["house_id"],
             ["houses.id"],
-        ),
-        sa.ForeignKeyConstraint(
-            ["user_id"],
-            ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
