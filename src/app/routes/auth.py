@@ -30,6 +30,10 @@ def token(
     try:
         user = user_service.get_user_by_credencials(credencials)
 
+        if user.id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
         token = jwt_service.encode(user.id, user.name)
         return Token(access_token=token, token_type="Bearer")
     except UserNotFoundByEmailError:

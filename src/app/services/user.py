@@ -5,7 +5,6 @@ from urllib.parse import quote
 from pwdlib import PasswordHash
 from pydantic import NameEmail
 
-from app.dto import UserCreateDTO
 from app.entities import UserEntity
 from app.exceptions import (
     CredencialsUserIncorrectError,
@@ -36,7 +35,7 @@ class UserService:
         self.email_sender = EmailSender()
 
     @staticmethod
-    def generate_token(dto: UserCreateDTO):
+    def generate_token(dto: UserEntity):
         """
         Modifica un dto ya existente para agregar el token de verificación
         y la fecha de expiration del token
@@ -54,7 +53,7 @@ class UserService:
         )
 
     @staticmethod
-    def set_validation_user(user_create_dto: UserCreateDTO):
+    def set_validation_user(user_create_dto: UserEntity):
         """
         Configuramos la validation del usuario en un user_create_dto
 
@@ -126,7 +125,7 @@ class UserService:
         data.password = self.password_hash.hash(data.password)
 
         # Creación de UserCreateDTO
-        user_create_dto = UserCreateDTO(
+        user_create_dto = UserEntity(
             name=data.name,
             email=data.email.lower(),
             password=data.password,

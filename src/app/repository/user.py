@@ -1,7 +1,6 @@
 from sqlalchemy import Connection, insert, select
 from sqlalchemy.exc import IntegrityError
 
-from app.dto import UserCreateDTO
 from app.entities import UserEntity
 from app.exceptions import DatabaseConstraintException, UserNotFoundError
 from app.infraestructure.models import users
@@ -61,6 +60,8 @@ class UserRepository:
         return None
 
     def update(self, user: UserEntity) -> None:
+        if user.id is None:
+            raise Exception()
         query = users.update().where(users.c.id == user.id).values(user.model_dump())
         result = self.connection.execute(query)
         if result.rowcount == 0:
@@ -72,15 +73,10 @@ class UserRepository:
         if result.rowcount == 0:
             raise UserNotFoundError(user_id)
 
-    def create(self, user: UserCreateDTO) -> int:
-        query = insert(users).values(
-            name=user.name,
-            email=user.email,
-            password=user.password,
-            is_verified=user.is_verified,
-            verification_token=user.verification_token,
-            verification_token_expired_at=user.verification_token_expired_at,
-        )
+    def create(self, user: UserEntity) -> int:
+        data = user.model_dump()
+        data.pop("id")
+        query = insert(users).values(**data)
         try:
             result = self.connection.execute(query)
             return result.lastrowid

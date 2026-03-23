@@ -5,10 +5,10 @@ from pydantic import BaseModel, EmailStr
 
 
 class UserEntity(BaseModel):
-    id: int
+    id: int | None = None
     name: str
     email: EmailStr
     password: str
     is_verified: bool = False
-    verification_token: Optional[str]
-    verification_token_expired_at: Optional[datetime]
+    verification_token: Optional[str] = None
+    verification_token_expired_at: Optional[datetime] = None
