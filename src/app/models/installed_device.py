@@ -2,8 +2,8 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Table
 
 from .base import metadata
 
-devices_user = Table(
-    "devices_user",
+installed_device = Table(
+    "installed_device",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
