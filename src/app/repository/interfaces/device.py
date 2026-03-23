@@ -1,0 +1,8 @@
+from typing import Protocol
+
+from app.entities import DeviceEntity
+
+
+class DeviceRepositoryProtocol(Protocol):
+    def get_by_id(self, id: int) -> None | DeviceEntity: ...
+    def create(self, device_data: DeviceEntity) -> int: ...
