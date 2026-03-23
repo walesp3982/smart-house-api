@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from app.dto import UserCreateDTO
 from app.entities import UserEntity
 from app.exceptions import DatabaseConstraintException, UserNotFoundError
-from app.models import users
+from app.infraestructure.models import users
 
 
 class UserRepository:

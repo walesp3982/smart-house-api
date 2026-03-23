@@ -3,7 +3,7 @@ from typing import Annotated, Any, Generator
 from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
 
-from app.database import get_engine
+from app.infraestructure.database import get_engine
 from app.repository import DeviceRepository, UserRepository
 
 
