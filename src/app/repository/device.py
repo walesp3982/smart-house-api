@@ -42,3 +42,18 @@ class DeviceRepository:
         result = self.conn.execute(query)
         if result.rowcount == 0:
             raise DeviceNotFoundByIdError(id)
+
+    def get_by_uuid(self, uuid: str) -> DeviceEntity | None:
+        query = devices.select().where(devices.c.device_uuid == uuid)
+
+        result = self.conn.execute(query).fetchone()
+
+        if result:
+            return DeviceEntity(
+                id=result.id,
+                device_uuid=result.device_uuid,
+                activation_code=result.activation_code,
+                type=result.type,
+            )
+
+        return None
