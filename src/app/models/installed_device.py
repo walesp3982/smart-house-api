@@ -7,7 +7,7 @@ installed_device = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("name", String(50), nullable=False),
-    Column("device_id", ForeignKey("devices.id"), nullable=False),
-    Column("house_id", ForeignKey("houses.id"), nullable=False),
-    Column("area_id", ForeignKey("areas.id"), nullable=True),
+    Column("device_id", ForeignKey("devices.id", ondelete="CASCADE"), nullable=False),
+    Column("house_id", ForeignKey("houses.id", ondelete="CASCADE"), nullable=False),
+    Column("area_id", ForeignKey("areas.id", ondelete="CASCADE"), nullable=True),
 )
