@@ -4,10 +4,10 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from app.depends.service import TokenJWTServiceDep, UserServiceDep
+from app.api.depends.service import TokenJWTServiceDep, UserServiceDep
+from app.api.schemas import Payload
 from app.entities import UserEntity
 from app.exceptions import UserNotFoundByIdError
-from app.schemas import Payload
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

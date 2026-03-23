@@ -5,6 +5,7 @@ from urllib.parse import quote
 from pwdlib import PasswordHash
 from pydantic import NameEmail
 
+from app.api.schemas import CredencialsUserRequest, UserRegisterRequest
 from app.entities import UserEntity
 from app.exceptions import (
     CredencialsUserIncorrectError,
@@ -16,7 +17,6 @@ from app.exceptions import (
 )
 from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
 from app.repository.interfaces import UserRepositoryProtocol
-from app.schemas import CredencialsUserRequest, UserRegisterRequest
 from app.settings import general_settings
 from app.settings.time import normalize, utcnow
 

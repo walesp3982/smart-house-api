@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.depends import DeviceServiceDep
+from app.api.depends import DeviceServiceDep
+from app.api.schemas import CreateDeviceRequest
 from app.exceptions.device_exception import DeviceDuplicateUUIDError
-from app.schemas import CreateDeviceRequest
 
 router = APIRouter(prefix="/devices", tags=["dispositivos"])
 

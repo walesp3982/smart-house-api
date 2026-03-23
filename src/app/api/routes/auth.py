@@ -3,13 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.depends import TokenJWTServiceDep, UserServiceDep
+from app.api.depends import TokenJWTServiceDep, UserServiceDep
+from app.api.schemas import CredencialsUserRequest
+from app.api.schemas.auth import Token
 from app.exceptions import (
     CredencialsUserIncorrectError,
     UserNotFoundByEmailError,
 )
-from app.schemas import CredencialsUserRequest
-from app.schemas.auth import Token
 
 router = APIRouter()
 

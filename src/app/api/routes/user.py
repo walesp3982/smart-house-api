@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, Response, status
 
-from app.depends import UserCurrentDep, UserServiceDep
-from app.exceptions import EmailAlreadyRegisterError
-from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
-from app.schemas import (
+from app.api.depends import UserCurrentDep, UserServiceDep
+from app.api.schemas import (
     UserRegisterRequest,
     UserVerifiedStatusResponse,
     VisibleDataUserResponse,
 )
+from app.exceptions import EmailAlreadyRegisterError
+from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
 
 router = APIRouter(prefix="/users", tags=["users"])
 
