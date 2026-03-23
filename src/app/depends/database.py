@@ -3,12 +3,12 @@ from typing import Annotated, Any, Generator
 from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
 
-from app.models import engine
+from app.database import get_engine
 from app.repository import DeviceRepository, UserRepository
 
 
 def get_connection() -> Generator[Connection, Any, Any]:
-    with engine.begin() as conn:
+    with get_engine().begin() as conn:
         try:
             yield conn
         except HTTPException:

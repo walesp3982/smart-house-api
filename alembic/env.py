@@ -12,7 +12,7 @@ os.makedirs("logs", exist_ok=True)
 # access to the values within the .ini file in use.
 config = context.config
 config.set_main_option(
-    "sqlalchemy.url", get_url_database.render_as_string(hide_password=False)
+    "sqlalchemy.url", get_url_database().render_as_string(hide_password=False)
 )
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
