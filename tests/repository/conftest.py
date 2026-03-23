@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 
 from app.models import metadata
-from app.repository import UserRepository
+from app.repository import DeviceRepository, UserRepository
 
 
 @pytest.fixture
@@ -21,3 +21,8 @@ def connection():
 @pytest.fixture
 def user_repo(connection):
     return UserRepository(connection)
+
+
+@pytest.fixture
+def device_repo(connection):
+    return DeviceRepository(connection)

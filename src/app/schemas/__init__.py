@@ -1,4 +1,5 @@
 from .auth import Payload
+from .device import CreateDeviceRequest
 from .user import (
     CredencialsUserRequest,
     UserRegisterRequest,
@@ -12,4 +13,5 @@ __all__ = [
     "VisibleDataUserResponse",
     "UserRegisterRequest",
     "UserVerifiedStatusResponse",
+    "CreateDeviceRequest",
 ]

@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.depends.database import UserRepositoryDep
-from app.services import TokenJWTService, UserService
+from app.depends.database import DeviceRepositoryDep, UserRepositoryDep
+from app.services import DeviceService, TokenJWTService, UserService
 
 
 def get_user_service(
@@ -13,5 +13,14 @@ def get_user_service(
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+
+
+def get_device_service(
+    device_repository: DeviceRepositoryDep,
+) -> DeviceService:
+    return DeviceService(device_repository)
+
+
+DeviceServiceDep = Annotated[DeviceService, Depends(get_device_service)]
 
 TokenJWTServiceDep = Annotated[TokenJWTService, Depends()]
