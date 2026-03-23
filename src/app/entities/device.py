@@ -12,7 +12,7 @@ class DeviceType(StrEnum):
 
 
 class DeviceEntity(BaseModel):
-    id: None | int
+    id: None | int = None
     device_uuid: str
     activation_code: str
     type: DeviceType
