@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.depends import DeviceServiceDep
 from app.schemas import CreateDeviceRequest
 
-router = APIRouter(prefix="/device", tags=["dispositivos"])
+router = APIRouter(prefix="/devices", tags=["dispositivos"])
 
 
 @router.post("/")
