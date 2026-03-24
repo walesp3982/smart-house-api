@@ -12,8 +12,8 @@ class HouseRepository:
     def __init__(self, conn: Connection):
         self.conn = conn
 
-    def create(self, house_data: HouseEntity) -> int:
-        query = insert(houses).values(house_data.model_dump(exclude={"id"}))
+    def create(self, data: HouseEntity) -> int:
+        query = insert(houses).values(data.model_dump(exclude={"id"}))
 
         try:
             result = self.conn.execute(query)
@@ -40,17 +40,17 @@ class HouseRepository:
 
         return HouseEntity(**result) if result is not None else None
 
-    def update(self, new_house: HouseEntity) -> None:
-        if new_house.id is None:
+    def update(self, data: HouseEntity) -> None:
+        if data.id is None:
             raise HouseIdNotStarted()
         query = (
             update(houses)
-            .where(houses.c.id == new_house.id)
-            .values(new_house.model_dump(exclude={"id"}))
+            .where(houses.c.id == data.id)
+            .values(data.model_dump(exclude={"id"}))
         )
         result = self.conn.execute(query)
         if result.rowcount == 0:
-            raise HouseNotFoundByIdError(new_house.id)
+            raise HouseNotFoundByIdError(data.id)
 
     def delete(self, house_id: int) -> None:
         query = delete(houses).where(houses.c.id == house_id)
