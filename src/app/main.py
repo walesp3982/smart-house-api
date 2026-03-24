@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, device, user
+from app.api.routes import auth, device, house, user
 from app.settings import general_settings
 
 app = FastAPI()
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(device.router)
+app.include_router(house.router)
 
 
 @app.get("/")

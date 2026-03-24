@@ -23,3 +23,8 @@ class HouseIdNotStarted(Exception):
 class HouseCannotDeleted(Exception):
     def __init__(self) -> None:
         super().__init__("La casa no pudo elimininarse")
+
+
+class HouseUnathorizadedError(Exception):
+    def __init__(self) -> None:
+        super().__init__("Casa no autorizada")

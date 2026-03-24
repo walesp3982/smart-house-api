@@ -10,5 +10,10 @@ class UpdateHouseRequest(BaseModel):
 
 class CreateHouseRequest(BaseModel):
     name: str
-    location: str
+    location: str | None = None
     invitation_validation: bool = True
+
+
+class UpdateHouseResponse(BaseModel):
+    message: str
+    updated: bool

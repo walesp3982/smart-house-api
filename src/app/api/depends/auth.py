@@ -57,3 +57,6 @@ def get_user_verified(current_user: UserCurrentDep) -> UserEntity:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Email not verified"
         )
     return current_user
+
+
+UserVerifyDep = Annotated[UserEntity, Depends(get_user_verified)]

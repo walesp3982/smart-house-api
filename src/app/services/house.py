@@ -1,6 +1,9 @@
 from app.api.schemas.house import CreateHouseRequest, UpdateHouseRequest
 from app.entities import HouseEntity
-from app.exceptions.house_exception import HouseNotFoundByIdError
+from app.exceptions.house_exception import (
+    HouseNotFoundByIdError,
+    HouseUnathorizadedError,
+)
 from app.repository.interfaces import HouseRepositoryProtocol
 from app.repository.interfaces.house import FilterGetAllHouse
 
@@ -43,7 +46,7 @@ class HouseService:
         houses = self.repository.get_all(FilterGetAllHouse(user_id=user_id))
         return houses
 
-    def get_house_by_id(self, house_id: int) -> HouseEntity:
+    def get_house_by_id(self, house_id: int, user_id: int) -> HouseEntity:
         """
         Obtiene una casa mediante su id
         Args:
@@ -58,9 +61,18 @@ class HouseService:
         house = self.repository.get_by_id(house_id)
         if house is None:
             raise HouseNotFoundByIdError(house_id)
+        # Revisamos que la casa esté autorizada
+        if house.user_id != user_id:
+            raise HouseUnathorizadedError()
+
         return house
 
-    def update_house_data(self, house_id: int, request: UpdateHouseRequest) -> bool:
+    def update_house_data(
+        self,
+        house_id: int,
+        request: UpdateHouseRequest,
+        user_id: int,
+    ) -> bool:
         """
         Actualizamos los datos de la casa
         Args:
@@ -75,12 +87,17 @@ class HouseService:
             Se lanza excepción si la casa con id no se encuentra
         """
 
+        # Revisa que si exista modificaciones a realizar
+        # retorna falso si no hay modificaciones
         if len(request.model_dump(exclude_none=True)) == 0:
             return False
 
         house = self.repository.get_by_id(house_id)
         if house is None:
             raise HouseNotFoundByIdError(house_id)
+
+        if house.user_id != user_id:
+            raise HouseUnathorizadedError()
 
         if request.location is not None:
             house.location = request.location
@@ -91,8 +108,13 @@ class HouseService:
         self.repository.update(house)
         return True
 
-    def delete_house(self, house_id) -> None:
+    def delete_house(self, house_id: int, user_id: int) -> None:
         """
         Eliminamos la casa mediante su house_id
         """
+        house = self.repository.get_by_id(house_id)
+        if house is None:
+            raise HouseNotFoundByIdError(user_id)
+        if house.user_id != user_id:
+            raise HouseUnathorizadedError
         self.repository.delete(house_id)
