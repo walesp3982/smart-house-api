@@ -1,6 +1,11 @@
-from .auth import PayloadDep, UserCurrentDep
+from .auth import PayloadDep, UserCurrentDep, UserVerifyDep
 from .database import ConnectionDep, DeviceRepositoryDep, UserRepositoryDep
-from .service import DeviceServiceDep, TokenJWTServiceDep, UserServiceDep
+from .service import (
+    DeviceServiceDep,
+    HouseServiceDep,
+    TokenJWTServiceDep,
+    UserServiceDep,
+)
 
 __all__ = [
     "ConnectionDep",
@@ -11,4 +16,6 @@ __all__ = [
     "UserCurrentDep",
     "DeviceRepositoryDep",
     "DeviceServiceDep",
+    "HouseServiceDep",
+    "UserVerifyDep",
 ]

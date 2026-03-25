@@ -28,7 +28,7 @@ def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
     return VisibleDataUserResponse(**actual_user.model_dump())
 
 
-@router.get("/verified")
+@router.post("/verified")
 def get_verified_user(user_id: int, user_service: UserServiceDep):
     is_verified = user_service.user_is_verified(user_id)
     return UserVerifiedStatusResponse(status=is_verified)

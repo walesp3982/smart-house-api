@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import Connection
 
 from app.infraestructure.database import get_engine
-from app.repository import DeviceRepository, UserRepository
+from app.repository import DeviceRepository, HouseRepository, UserRepository
 
 
 def get_connection() -> Generator[Connection, Any, Any]:
@@ -36,3 +36,10 @@ def get_device_repository(connection: ConnectionDep) -> DeviceRepository:
 
 
 DeviceRepositoryDep = Annotated[DeviceRepository, Depends(get_device_repository)]
+
+
+def get_house_repository(connection: ConnectionDep):
+    return HouseRepository(connection)
+
+
+HouserRepositoryDep = Annotated[HouseRepository, Depends(get_house_repository)]
