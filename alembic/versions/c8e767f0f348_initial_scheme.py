@@ -30,7 +30,7 @@ def upgrade() -> None:
         sa.Column(
             "type",
             sa.Enum(
-                "LIGHT", "THERMOSTAT", "CAMERA", "LOCK", "SENSOR", name="devicetype"
+                "LIGHT", "THERMOSTAT", "CAMERA", "DOOR", "MOVEMENT", name="devicetype"
             ),
             nullable=False,
         ),
