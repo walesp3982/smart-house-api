@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import area, auth, device, house, user
+from app.api.routes import area, auth, device, house, user, voice
 from app.settings import general_settings
 
 app = FastAPI()
@@ -21,6 +21,8 @@ app.include_router(user.router)
 app.include_router(device.router)
 app.include_router(house.router)
 app.include_router(area.router)
+app.include_router(voice.router)
+
 
 @app.get("/")
 async def root():
