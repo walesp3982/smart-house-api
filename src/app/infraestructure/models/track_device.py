@@ -16,7 +16,11 @@ track_devices = Table(
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column(
         "device_id",
-        ForeignKey("devices.id", name="fk_track_devices_device_id", ondelete="CASCADE"),
+        ForeignKey(
+            "installed_devices.id",
+            name="fk_track_devices_device_id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     ),
     Column("status", Enum(StatusDevice), nullable=False),
