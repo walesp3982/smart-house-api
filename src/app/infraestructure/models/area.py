@@ -1,16 +1,8 @@
-from enum import StrEnum
-
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table
 
+from app.entities.areas import AreaType
+
 from .base import metadata
-
-
-class AreaType(StrEnum):
-    living_room = "living_room"
-    bedroom = "bedroom"
-    kitchen = "kitchen"
-    outside = "outside"
-
 
 areas = Table(
     "areas",
