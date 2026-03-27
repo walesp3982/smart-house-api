@@ -3,11 +3,18 @@ from typing import Annotated
 from fastapi import Depends
 
 from app.api.depends.database import (
+    AreaRepositoryDep,
     DeviceRepositoryDep,
     HouserRepositoryDep,
     UserRepositoryDep,
 )
-from app.services import DeviceService, HouseService, TokenJWTService, UserService
+from app.services import (
+    AreaService,
+    DeviceService,
+    HouseService,
+    TokenJWTService,
+    UserService,
+)
 
 TokenJWTServiceDep = Annotated[TokenJWTService, Depends()]
 
@@ -35,3 +42,7 @@ def get_house_service(house_repository: HouserRepositoryDep) -> HouseService:
 
 
 HouseServiceDep = Annotated[HouseService, Depends(get_house_service)]
+
+
+def get_area_service(area_repository: AreaRepositoryDep) -> AreaService:
+    return AreaService(area_repository)
