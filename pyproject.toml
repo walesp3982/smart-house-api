@@ -76,6 +76,9 @@ package = true
 line-length = 88
 lint.select = ["E", "F", "I"]
 
+[tool.pyright]
+typeCheckingMode = "standard" 
+
 [project.scripts]
 dev = "app.scripts.server:dev"
 prod = "app.scripts.server:prod"

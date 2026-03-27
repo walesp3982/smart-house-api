@@ -36,7 +36,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         audio = sr.AudioFile(io.BytesIO(audio_bytes))
         with audio as source:
             audio_data = recognizer.record(source)
-        text = recognizer.recognize_google(audio_data, language="es-ES")
+        text = recognizer.recognize_google(audio_data, language="es-ES")  # type: ignore
         command = parse_command(text)
         return {"transcription": text, **command}
     except sr.UnknownValueError:
