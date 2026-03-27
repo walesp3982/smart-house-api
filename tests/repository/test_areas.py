@@ -70,6 +70,9 @@ def test_area_get_all(area_repo, create_house):
 
 
 def test_area_get_all_filter_house_id(area_repo, create_house):
+    """
+    Testing para el revisar que el filtrado por house_id
+    """
     house_1 = create_house(name="casa1", email_user="a@gmail.com")
     house_2 = create_house(name="casa2", email_user="b@gmail.com")
 
