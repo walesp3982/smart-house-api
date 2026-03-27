@@ -7,8 +7,8 @@ class DeviceType(StrEnum):
     LIGHT = "light"
     THERMOSTAT = "thermostat"
     CAMERA = "camera"
-    LOCK = "lock"
-    SENSOR = "sensor"
+    DOOR = "door"
+    MOVEMENT = "movement"
 
 
 class DeviceEntity(BaseModel):
