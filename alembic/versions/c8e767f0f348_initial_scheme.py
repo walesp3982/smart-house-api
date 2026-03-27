@@ -88,7 +88,12 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("house_id", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["house_id"], ["houses.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["house_id"],
+            ["houses.id"],
+            ondelete="CASCADE",
+            name="fk_house",
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -98,9 +103,15 @@ def upgrade() -> None:
         sa.Column("device_id", sa.Integer(), nullable=False),
         sa.Column("house_id", sa.Integer(), nullable=False),
         sa.Column("area_id", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["area_id"], ["areas.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["device_id"], ["devices.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["house_id"], ["houses.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["area_id"], ["areas.id"], ondelete="CASCADE", name="fk_areas"
+        ),
+        sa.ForeignKeyConstraint(
+            ["device_id"], ["devices.id"], ondelete="CASCADE", name="fk_device"
+        ),
+        sa.ForeignKeyConstraint(
+            ["house_id"], ["houses.id"], ondelete="CASCADE", name="fk_house"
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     # ### end Alembic commands ###
