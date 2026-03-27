@@ -38,6 +38,8 @@ class AreaRepository:
         if filters is not None:
             if filters.house_id is not None:
                 query = query.where(areas.c.house_id == filters.house_id)
+            if filters.name is not None:
+                query = query.where(areas.c.name.ilike(f"%{filters.name}%"))
 
         result = self.conn.execute(query).mappings().all()
 

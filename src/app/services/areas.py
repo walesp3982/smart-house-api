@@ -1,6 +1,9 @@
 from app.api.schemas.area import CreateAreaRequest, UpdateAreaRequest
 from app.entities import AreaEntity
-from app.exceptions.areas_exceptions import AreaNotFoundByIdError
+from app.exceptions.areas_exceptions import (
+    AreaNotFoundByIdError,
+    DuplicateNameAreaError,
+)
 from app.repository.interfaces import AreaRepositoryProtocol, FilterAreas
 
 
@@ -49,9 +52,14 @@ class AreaService:
             int: El ID de la nueva área creada.
 
         Raises:
-            DatabaseConstraintException: Si hay una violación de restricciones
-            (ej. nombre duplicado en la casa).
+            DuplicateNameAreaError: Si ya existe un área con el mismo nombre en la casa.
+            DatabaseConstraintException: Si hay una violación de restricciones.
         """
+        # Verificar duplicado
+        existing_areas = self.repository.get_all(FilterAreas(house_id=house_id))
+        if any(a.name.lower() == area_data.name.lower() for a in existing_areas):
+            raise DuplicateNameAreaError(area_data.name, house_id)
+
         area = AreaEntity(
             house_id=house_id,
             name=area_data.name,
@@ -69,6 +77,8 @@ class AreaService:
 
         Raises:
             AreaNotFoundByIdError: Si no se encuentra el área con el ID proporcionado.
+            DuplicateNameAreaError: Si ya existe otra área con el mismo nombre en la
+            casa.
             DatabaseConstraintException: Si hay una violación de restricciones durante
             la actualización.
         """
@@ -79,7 +89,16 @@ class AreaService:
         if area is None:
             raise AreaNotFoundByIdError(area_id)
 
+        # Verificar duplicado si se cambia el nombre
         if request.name is not None:
+            existing_areas = self.repository.get_all(
+                FilterAreas(house_id=area.house_id)
+            )
+            if any(
+                a.name.lower() == request.name.lower() and a.id != area_id
+                for a in existing_areas
+            ):
+                raise DuplicateNameAreaError(request.name, area.house_id)
             area.name = request.name
 
         if request.type is not None:

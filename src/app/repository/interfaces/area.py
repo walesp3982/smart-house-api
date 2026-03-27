@@ -8,6 +8,7 @@ from app.entities import AreaEntity
 class FilterAreas(BaseModel):
     with_devices: bool = True
     house_id: int | None = None
+    name: str | None = None
 
 
 class AreaRepositoryProtocol(Protocol):

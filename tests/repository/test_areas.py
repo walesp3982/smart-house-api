@@ -161,3 +161,37 @@ def test_delete_area_not_found(area_repo):
     """
     with pytest.raises(AreaNotFoundByIdError):
         area_repo.delete(9999)
+
+
+def test_area_get_all_filter_name(area_repo, create_house):
+    """
+    Testing del filtro por nombre en get_all (insensitive partial match)
+    """
+    house_id = create_house(name="casa")
+
+    areas = [
+        create_area(name="Cocina Principal", house_id=house_id),
+        create_area(name="cocina pequeña", house_id=house_id),
+        create_area(name="Sala", house_id=house_id),
+        create_area(name="Dormitorio", house_id=house_id),
+    ]
+
+    for area in areas:
+        area_repo.create(area)
+
+    # Filtrar por "cocina" (debe encontrar ambas, insensitive)
+    filtered_areas = area_repo.get_all(FilterAreas(name="cocina"))
+
+    assert len(filtered_areas) == 2
+    names = [a.name for a in filtered_areas]
+    assert "Cocina Principal" in names
+    assert "cocina pequeña" in names
+
+    # Filtrar por "sala" (debe encontrar 1)
+    filtered_areas = area_repo.get_all(FilterAreas(name="sala"))
+    assert len(filtered_areas) == 1
+    assert filtered_areas[0].name == "Sala"
+
+    # Filtrar por algo que no existe
+    filtered_areas = area_repo.get_all(FilterAreas(name="baño"))
+    assert len(filtered_areas) == 0
