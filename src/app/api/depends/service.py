@@ -46,3 +46,6 @@ HouseServiceDep = Annotated[HouseService, Depends(get_house_service)]
 
 def get_area_service(area_repository: AreaRepositoryDep) -> AreaService:
     return AreaService(area_repository)
+
+
+AreaServiceDep = Annotated[AreaService, Depends(get_area_service)]
