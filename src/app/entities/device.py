@@ -39,7 +39,7 @@ class DeviceType(StrEnum):
     LOCK = "lock"
     SENSOR = "sensor"
 
-    def validate_commands(self) -> list[Action]:
+    def command(self) -> list[Action]:
         """
         Va a dar los comandos validos en spanish
         que puede realizar el device
