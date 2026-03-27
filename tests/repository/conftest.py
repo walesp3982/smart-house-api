@@ -4,8 +4,9 @@ import pytest
 from sqlalchemy import create_engine
 
 from app.entities import UserEntity
+from app.entities.house import HouseEntity
 from app.infraestructure.models import metadata
-from app.repository import DeviceRepository, UserRepository
+from app.repository import AreaRepository, DeviceRepository, UserRepository
 from app.repository.house import HouseRepository
 
 
@@ -54,3 +55,30 @@ def create_user(user_repo) -> Callable[..., int]:
         )
 
     return _create
+
+
+@pytest.fixture
+def create_house(house_repo, create_user) -> Callable[..., int]:
+    def _create(
+        name: str,
+        location: str | None = None,
+        invitation_validation: bool = True,
+        email_user: str = "juan@example.com",
+    ):
+        user = create_user(email=email_user)
+        house = house_repo.create(
+            HouseEntity(
+                name=name,
+                user_id=user,
+                location=location,
+                invitation_validation=invitation_validation,
+            )
+        )
+        return house
+
+    return _create
+
+
+@pytest.fixture
+def area_repo(connection):
+    return AreaRepository(connection)
