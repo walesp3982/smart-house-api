@@ -35,6 +35,10 @@ class AreaRepository:
     def get_all(self, filters: Optional[FilterAreas] = None) -> list[AreaEntity]:
         query = select(areas)
 
+        if filters is not None:
+            if filters.house_id is not None:
+                query = query.where(areas.c.house_id == filters.house_id)
+
         result = self.conn.execute(query).mappings().all()
 
         return [AreaEntity(**row) for row in result]

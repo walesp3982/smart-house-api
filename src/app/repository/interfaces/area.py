@@ -6,10 +6,11 @@ from app.entities import AreaEntity
 
 
 class FilterAreas(BaseModel):
-    with_devices = True
+    with_devices: bool = True
+    house_id: int | None = None
 
 
-class AreaProtocol(Protocol):
+class AreaRepositoryProtocol(Protocol):
     def create(self, data: AreaEntity) -> int: ...
     def get_by_id(self, id: int) -> AreaEntity | None: ...
     def get_all(self, filters: Optional[FilterAreas] = None) -> list[AreaEntity]: ...

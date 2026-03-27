@@ -11,7 +11,7 @@ class AreaType(StrEnum):
 
 
 class AreaEntity(BaseModel):
-    id: int | None
+    id: int | None = None
     name: str
     type: AreaType
     house_id: int
