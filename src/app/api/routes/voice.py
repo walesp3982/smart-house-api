@@ -1,7 +1,7 @@
 import io
 
 import speech_recognition as sr
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 router = APIRouter(prefix="/voice", tags=["voz"])
 
@@ -18,6 +18,12 @@ def parse_command(text: str):
 
 @router.post("/transcribe")
 async def transcribe_audio(file: UploadFile = File(...)):
+
+    if file.filename is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se subió ningún archivo",
+        )
     if not file.filename.lower().endswith(".wav"):
         raise HTTPException(
             status_code=400, detail="Formato de audio no soportado. Usa WAV."
