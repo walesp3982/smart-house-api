@@ -20,7 +20,10 @@ from app.repository.interfaces import UserRepositoryProtocol
 from app.settings import general_settings
 from app.settings.time import normalize, utcnow
 
-from .email import EmailContentEnum, EmailSender, FactoryEmailContent
+from ..infraestructure.email.email import (
+    EmailSender,
+    FactoryEmailContent,
+)
 
 
 class UserService:
@@ -92,7 +95,7 @@ class UserService:
             safe_token = quote(user.verification_token, safe="")
             final_url = f"{str(host)}/{url_verification}/{safe_token}"
             content = FactoryEmailContent.create(
-                type=EmailContentEnum.verification,
+                type="verification",
                 url=final_url,
                 name=user.name,
             ).generate()
