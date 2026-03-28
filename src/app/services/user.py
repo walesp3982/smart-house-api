@@ -20,7 +20,11 @@ from app.repository.interfaces import UserRepositoryProtocol
 from app.settings import general_settings
 from app.settings.time import normalize, utcnow
 
-from .email import EmailContentEnum, EmailSender, FactoryEmailContent
+from ..infraestructure.email.email import (
+    EmailContentEnum,
+    EmailSender,
+    FactoryEmailContent,
+)
 
 
 class UserService:
