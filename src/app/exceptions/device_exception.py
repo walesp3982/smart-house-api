@@ -18,3 +18,8 @@ class DeviceNotFoundByIdError(DeviceNotFoundError):
 class DeviceDuplicateUUIDError(Exception):
     def __init__(self):
         super().__init__("Device ya encontrado en la DB")
+
+
+class ActionDeviceNotFound(Exception):
+    def __init__(self):
+        super().__init__("La action para el dispositivo no fue encontrado")
