@@ -1,5 +1,5 @@
 # voice/service.py
-from app.entities import InstalledDeviceEntity
+from app.entities.installed_device import InstalledDeviceWithDevice
 from app.exceptions.device_exception import ActionDeviceNotFound
 from app.exceptions.installed_device import InstalledDeviceNotFound
 from app.infraestructure.speech.protocol import SpeechRecognizerProtocol
@@ -10,7 +10,7 @@ class CommandVoiceService:
     def __init__(
         self,
         recognizer: SpeechRecognizerProtocol,
-        devices: list[InstalledDeviceEntity],
+        devices: list[InstalledDeviceWithDevice],
         house_id: int,
     ):
         self._recognizer = recognizer
@@ -38,7 +38,7 @@ class CommandVoiceService:
     def get_action(
         self,
         text: str,
-        installed_device: InstalledDeviceEntity,
+        installed_device: InstalledDeviceWithDevice,
     ) -> str | None:
         text = text.lower()
         for command in installed_device.device.type.command():
@@ -47,7 +47,7 @@ class CommandVoiceService:
                     return command.naming_broker
         return None
 
-    def get_device(self, text: str) -> InstalledDeviceEntity | None:
+    def get_device(self, text: str) -> InstalledDeviceWithDevice | None:
         """
         Obtenemos el InstalledDeviceEntity por su nombre
         """
