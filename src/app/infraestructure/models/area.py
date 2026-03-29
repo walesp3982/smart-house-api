@@ -20,7 +20,7 @@ areas = Table(
     Column("type", Enum(AreaType), nullable=False),
     Column(
         "house_id",
-        ForeignKey("houses.id", ondelete="CASCADE", name="fk_house"),
+        ForeignKey("houses.id", ondelete="CASCADE", name="fk_house_in_area"),
         nullable=False,
     ),
     UniqueConstraint("name", "house_id", name="name_unique_by_house_id"),
