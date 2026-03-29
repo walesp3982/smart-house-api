@@ -1,13 +1,17 @@
+import secrets
 from typing import Callable
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import create_engine
 
-from app.entities import UserEntity
+from app.entities import DeviceEntity, DeviceType, UserEntity
 from app.entities.house import HouseEntity
 from app.infraestructure.models import metadata
 from app.repository import AreaRepository, DeviceRepository, UserRepository
 from app.repository.house import HouseRepository
+from app.repository.installed_device import InstalledDeviceRepository
+from app.repository.track_device import TrackDeviceRepository
 
 
 @pytest.fixture
@@ -64,12 +68,14 @@ def create_house(house_repo, create_user) -> Callable[..., int]:
         location: str | None = None,
         invitation_validation: bool = True,
         email_user: str = "juan@example.com",
+        user_id: int | None = None,
     ):
-        user = create_user(email=email_user)
+        if user_id is None:
+            user_id = create_user(email=email_user)
         house = house_repo.create(
             HouseEntity(
                 name=name,
-                user_id=user,
+                user_id=user_id,
                 location=location,
                 invitation_validation=invitation_validation,
             )
@@ -82,3 +88,57 @@ def create_house(house_repo, create_user) -> Callable[..., int]:
 @pytest.fixture
 def area_repo(connection):
     return AreaRepository(connection)
+
+
+@pytest.fixture
+def track_device_repo(connection):
+    return TrackDeviceRepository(connection)
+
+
+@pytest.fixture
+def installed_device_repo(connection):
+    return InstalledDeviceRepository(connection)
+
+
+@pytest.fixture
+def create_device(device_repo) -> Callable[..., int]:
+    def _create(type: DeviceType = DeviceType.LIGHT):
+        device_uuid = uuid4().__str__()
+        code_activation = secrets.token_hex(4)
+        device = DeviceEntity(
+            device_uuid=device_uuid, activation_code=code_activation, type=type
+        )
+        return device_repo.create(device)
+
+    return _create
+
+
+@pytest.fixture
+def create_installed_device(
+    installed_device_repo, create_device, create_house, create_user
+) -> Callable[..., int]:
+    def _create(
+        name: str = "Test Device",
+        house_id: int | None = None,
+        area_id: int | None = None,
+        user_id: int | None = None,
+    ):
+        if user_id is None:
+            user_id = create_user()
+        if house_id is None:
+            house_id = create_house(name="Test House", user_id=user_id)
+
+        device_id = create_device()
+
+        from app.entities.installed_device import InstalledDeviceEntity
+
+        installed_device = InstalledDeviceEntity(
+            name=name,
+            device_id=device_id,
+            house_id=house_id,
+            area_id=area_id,
+            user_id=user_id,
+        )
+        return installed_device_repo.create(installed_device)
+
+    return _create
