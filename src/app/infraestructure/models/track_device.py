@@ -1,14 +1,8 @@
-from enum import StrEnum
-
 from sqlalchemy import TIMESTAMP, Column, Enum, ForeignKey, Integer, Table
 
+from app.entities.track_device import StatusDevice
+
 from .base import metadata
-
-
-class StatusDevice(StrEnum):
-    ON = "on"
-    OFF = "off"
-
 
 track_devices = Table(
     "track_devices",
