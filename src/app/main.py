@@ -1,8 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.depends.mqtt import get_mqtt_provider
 from app.api.routes import area, auth, device, house, user, voice
+from app.infraestructure.mqtt.client import MQTTClient
 from app.settings import general_settings
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    MQTTClient.connect()
+    get_mqtt_provider()
+
+    yield
+    MQTTClient.disconnect()
+
 
 app = FastAPI()
 
