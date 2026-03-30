@@ -7,6 +7,7 @@ from app.api.depends.database import (
     DeviceRepositoryDep,
     HouserRepositoryDep,
     InstalledDeviceRepositoryDep,
+    TrackDeviceRepositoryDep,
     UserRepositoryDep,
 )
 from app.services import (
@@ -15,6 +16,7 @@ from app.services import (
     HouseService,
     InstalledDeviceService,
     TokenJWTService,
+    TrackDeviceService,
     UserService,
 )
 
@@ -63,3 +65,12 @@ def get_installed_device_service(
 InstalledDeviceServiceDep = Annotated[
     InstalledDeviceService, Depends(get_installed_device_service)
 ]
+
+
+def get_track_device_service(
+    track_device_repository: TrackDeviceRepositoryDep,
+) -> TrackDeviceService:
+    return TrackDeviceService(track_device_repository)
+
+
+TrackDeviceServiceDep = Annotated[TrackDeviceService, Depends(get_track_device_service)]

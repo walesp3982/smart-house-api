@@ -9,6 +9,7 @@ from app.repository import (
     DeviceRepository,
     HouseRepository,
     InstalledDeviceRepository,
+    TrackDeviceRepository,
     UserRepository,
 )
 
@@ -64,4 +65,13 @@ def get_installed_device_repository(connection: ConnectionDep):
 
 InstalledDeviceRepositoryDep = Annotated[
     InstalledDeviceRepository, Depends(get_installed_device_repository)
+]
+
+
+def get_track_device_repository(connection: ConnectionDep):
+    return TrackDeviceRepository(connection)
+
+
+TrackDeviceRepositoryDep = Annotated[
+    TrackDeviceRepository, Depends(get_track_device_repository)
 ]

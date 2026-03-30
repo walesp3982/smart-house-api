@@ -7,6 +7,8 @@ from app.entities.track_device import TrackDevice
 
 class FilterTrackDevices(BaseModel):
     device_id: int | None = None
+    house_id: int | None = None
+    user_id: int | None = None
     status: str | None = None
 
 

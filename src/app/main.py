@@ -10,6 +10,7 @@ from app.api.routes import (
     device,
     house,
     installed_device,
+    track_device,
     user,
     voice,
 )
@@ -44,6 +45,7 @@ app.include_router(device.router)
 app.include_router(house.router)
 app.include_router(area.router)
 app.include_router(installed_device.router)
+app.include_router(track_device.router)
 app.include_router(voice.router)
 
 

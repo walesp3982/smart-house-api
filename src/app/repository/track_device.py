@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import Connection, delete, insert, select, update
+from sqlalchemy import Connection, delete, insert, join, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.entities.track_device import TrackDevice
@@ -9,7 +9,7 @@ from app.exceptions.track_device_exceptions import (
     TrackDeviceEntityIdNotStartedError,
     TrackDeviceNotFoundByIdError,
 )
-from app.infraestructure.models import track_devices
+from app.infraestructure.models import installed_devices, track_devices
 from app.repository.interfaces.track_device import FilterTrackDevices
 
 
@@ -38,10 +38,23 @@ class TrackDeviceRepository:
         query = select(track_devices)
 
         if filters is not None:
+            if filters.house_id is not None or filters.user_id is not None:
+                query = query.select_from(
+                    join(
+                        track_devices,
+                        installed_devices,
+                        track_devices.c.device_id == installed_devices.c.id,
+                    )
+                )
+
             if filters.device_id is not None:
                 query = query.where(track_devices.c.device_id == filters.device_id)
             if filters.status is not None:
                 query = query.where(track_devices.c.status == filters.status)
+            if filters.house_id is not None:
+                query = query.where(installed_devices.c.house_id == filters.house_id)
+            if filters.user_id is not None:
+                query = query.where(installed_devices.c.user_id == filters.user_id)
 
         result = self.conn.execute(query).mappings().all()
 
