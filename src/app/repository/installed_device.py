@@ -1,15 +1,19 @@
 from typing import Optional
 
-from sqlalchemy import Connection, delete, insert, select, update
+from sqlalchemy import Connection, delete, insert, join, select, update
 from sqlalchemy.exc import IntegrityError
 
-from app.entities.installed_device import InstalledDeviceEntity
+from app.entities.device import DeviceEntity
+from app.entities.installed_device import (
+    InstalledDeviceEntity,
+    InstalledDeviceWithDevice,
+)
 from app.exceptions.database_exceptions import DatabaseConstraintException
 from app.exceptions.installed_device_exceptions import (
     InstalledDeviceEntityIdNotStartedError,
     InstalledDeviceNotFoundByIdError,
 )
-from app.infraestructure.models import installed_devices
+from app.infraestructure.models import devices, installed_devices
 from app.repository.interfaces.installed_device import FilterInstalledDevices
 
 
@@ -75,3 +79,64 @@ class InstalledDeviceRepository:
 
         if result.rowcount == 0:
             raise InstalledDeviceNotFoundByIdError(id)
+
+    def get_with_device(self, id: int) -> InstalledDeviceWithDevice | None:
+        """Obtiene un installed_device con su información de device asociada."""
+        query = (
+            select(installed_devices, devices)
+            .select_from(
+                join(
+                    installed_devices,
+                    devices,
+                    installed_devices.c.device_id == devices.c.id,
+                )
+            )
+            .where(installed_devices.c.id == id)
+        )
+
+        result = self.conn.execute(query).mappings().one_or_none()
+
+        if result is None:
+            return None
+
+        installed_device_data = {
+            "id": result.id,
+            "name": result.name,
+            "device_id": result.device_id,
+            "house_id": result.house_id,
+            "area_id": result.area_id,
+            "user_id": result.user_id,
+        }
+
+        device_data = {
+            "id": result.id_1,
+            "device_uuid": result.device_uuid,
+            "activation_code": result.activation_code,
+            "type": result.type,
+        }
+
+        device = DeviceEntity(**device_data)
+        return InstalledDeviceWithDevice(**installed_device_data, device=device)
+
+    def get_by_uuid(self, uuid: str) -> InstalledDeviceEntity | None:
+        """Obtiene un installed_device por el uuid del device."""
+        query = (
+            select(installed_devices)
+            .select_from(
+                join(
+                    installed_devices,
+                    devices,
+                    installed_devices.c.device_id == devices.c.id,
+                )
+            )
+            .where(devices.c.device_uuid == uuid)
+        )
+
+        result = self.conn.execute(query).mappings().one_or_none()
+
+        return InstalledDeviceEntity(**result) if result is not None else None
+
+    def get_all_by_user_id(self, user_id: int) -> list[InstalledDeviceEntity]:
+        """Obtiene todos los installed_devices de un usuario específico."""
+        filters = FilterInstalledDevices(user_id=user_id)
+        return self.get_all(filters)

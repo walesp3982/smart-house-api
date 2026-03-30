@@ -1,7 +1,10 @@
 from .database_exceptions import DatabaseConstraintException
 from .installed_device_exceptions import (
+    InstalledDeviceAlreadyRegisteredError,
     InstalledDeviceEntityIdNotStartedError,
     InstalledDeviceNotFoundByIdError,
+    InstalledDeviceUnauthorizedError,
+    InstalledDeviceVerificationError,
 )
 from .track_device_exceptions import (
     TrackDeviceEntityIdNotStartedError,
@@ -30,4 +33,7 @@ __all__ = [
     "TrackDeviceEntityIdNotStartedError",
     "InstalledDeviceNotFoundByIdError",
     "InstalledDeviceEntityIdNotStartedError",
+    "InstalledDeviceAlreadyRegisteredError",
+    "InstalledDeviceVerificationError",
+    "InstalledDeviceUnauthorizedError",
 ]

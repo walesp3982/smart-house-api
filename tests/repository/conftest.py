@@ -1,5 +1,5 @@
 import secrets
-from typing import Callable
+from typing import Callable, cast
 from uuid import uuid4
 
 import pytest
@@ -71,7 +71,7 @@ def create_house(house_repo, create_user) -> Callable[..., int]:
         user_id: int | None = None,
     ):
         if user_id is None:
-            user_id = create_user(email=email_user)
+            user_id = cast(int, create_user(email=email_user))
         house = house_repo.create(
             HouseEntity(
                 name=name,
@@ -124,9 +124,9 @@ def create_installed_device(
         user_id: int | None = None,
     ):
         if user_id is None:
-            user_id = create_user()
+            user_id = cast(int, create_user())
         if house_id is None:
-            house_id = create_house(name="Test House", user_id=user_id)
+            house_id = cast(int, create_house(name="Test House", user_id=user_id))
 
         device_id = create_device()
 
