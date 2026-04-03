@@ -11,7 +11,7 @@ class DeviceService:
         self.repository = repository
         self.password_hash = PasswordHash.recommended()
 
-    def create(self, request: CreateDeviceRequest) -> None:
+    def create(self, request: CreateDeviceRequest) -> str:
         # Encriptamos el código de activación para más seguridad
         encrip_activation_code = self.password_hash.hash(request.activation_code)
 
@@ -25,3 +25,5 @@ class DeviceService:
         )
 
         self.repository.create(data_device)
+
+        return data_device.device_uuid

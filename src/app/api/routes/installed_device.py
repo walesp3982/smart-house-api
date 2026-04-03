@@ -16,7 +16,7 @@ from app.exceptions.installed_device_exceptions import (
 router = APIRouter(prefix="/installed_devices", tags=["Installed Devices"])
 
 
-@router.get("/", response_model=list[dict])
+@router.get("", response_model=list[dict])
 def get_installed_devices(
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
@@ -80,7 +80,7 @@ def get_installed_device(
         )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
 def register_installed_device(
     request: CreateInstalledDeviceRequest,
     user: UserVerifyDep,

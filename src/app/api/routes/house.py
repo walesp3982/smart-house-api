@@ -14,7 +14,7 @@ from app.exceptions.house_exception import (
 router = APIRouter(prefix="/houses", tags=["Casa"])
 
 
-@router.get("/")
+@router.get("")
 def get_all_house(user: UserVerifyDep, house_service: HouseServiceDep):
     if user.id is None:
         raise HTTPException(
