@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, String, Table
 
 from .base import metadata
 
@@ -12,7 +12,7 @@ installed_devices = Table(
         ForeignKey(
             "devices.id",
             ondelete="CASCADE",
-            name="fk_device",
+            name="fk_device_in_installed_device",
         ),
         nullable=False,
     ),
@@ -20,8 +20,8 @@ installed_devices = Table(
         "house_id",
         ForeignKey(
             "houses.id",
-            ondelete="SET NULL",
-            name="fk_house",
+            ondelete="RESTRICT",
+            name="fk_house_in_installed_device",
         ),
         nullable=True,
     ),
@@ -30,7 +30,7 @@ installed_devices = Table(
         ForeignKey(
             "users.id",
             ondelete="CASCADE",
-            name="fk_user",
+            name="fk_user_in_installed_device",
         ),
         nullable=False,
     ),
@@ -38,9 +38,13 @@ installed_devices = Table(
         "area_id",
         ForeignKey(
             "areas.id",
-            ondelete="SET NULL",
-            name="fk_areas",
+            ondelete="RESTRICT",
+            name="fk_areas_in_installed_device",
         ),
         nullable=True,
+    ),
+    CheckConstraint(
+        "area_id IS NULL OR house_id IS NOT NULL",
+        name="chkk_area_requires_house",
     ),
 )

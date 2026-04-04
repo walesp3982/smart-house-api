@@ -6,13 +6,17 @@ from app.api.depends.database import (
     AreaRepositoryDep,
     DeviceRepositoryDep,
     HouserRepositoryDep,
+    InstalledDeviceRepositoryDep,
+    TrackDeviceRepositoryDep,
     UserRepositoryDep,
 )
 from app.services import (
     AreaService,
     DeviceService,
     HouseService,
+    InstalledDeviceService,
     TokenJWTService,
+    TrackDeviceService,
     UserService,
 )
 
@@ -49,3 +53,24 @@ def get_area_service(area_repository: AreaRepositoryDep) -> AreaService:
 
 
 AreaServiceDep = Annotated[AreaService, Depends(get_area_service)]
+
+
+def get_installed_device_service(
+    installed_device_repository: InstalledDeviceRepositoryDep,
+    device_repository: DeviceRepositoryDep,
+) -> InstalledDeviceService:
+    return InstalledDeviceService(installed_device_repository, device_repository)
+
+
+InstalledDeviceServiceDep = Annotated[
+    InstalledDeviceService, Depends(get_installed_device_service)
+]
+
+
+def get_track_device_service(
+    track_device_repository: TrackDeviceRepositoryDep,
+) -> TrackDeviceService:
+    return TrackDeviceService(track_device_repository)
+
+
+TrackDeviceServiceDep = Annotated[TrackDeviceService, Depends(get_track_device_service)]
