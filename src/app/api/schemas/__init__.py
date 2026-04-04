@@ -1,5 +1,6 @@
 from .auth import Payload
 from .device import CreateDeviceRequest
+from .general import ErrorResponse
 from .installed_device import CreateInstalledDeviceRequest, UpdateInstalledDeviceRequest
 from .track_device import TrackDeviceResponse
 from .user import (
@@ -19,4 +20,5 @@ __all__ = [
     "CreateInstalledDeviceRequest",
     "TrackDeviceResponse",
     "UpdateInstalledDeviceRequest",
+    "ErrorResponse",
 ]
