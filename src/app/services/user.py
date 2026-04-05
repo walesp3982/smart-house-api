@@ -89,7 +89,7 @@ class UserService:
         """
         if not user.is_verified:
             if user.verification_token is None:
-                raise Exception("No se encontró el token de verificacion")
+                return
             host = str(general_settings.app_host).rstrip("/")
             url_verification = url_verification.lstrip("/").rstrip("/")
             safe_token = quote(user.verification_token, safe="")
