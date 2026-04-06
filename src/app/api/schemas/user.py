@@ -10,6 +10,7 @@ class VisibleDataUserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
+    is_verified: bool
 
 
 class UserRegisterRequest(BaseModel):

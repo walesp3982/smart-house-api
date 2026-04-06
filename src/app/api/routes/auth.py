@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.depends import TokenJWTServiceDep, UserServiceDep
 from app.api.schemas import CredencialsUserRequest
 from app.api.schemas.auth import Token
+from app.api.schemas.general import ErrorResponse
 from app.exceptions import (
     CredencialsUserIncorrectError,
     UserNotFoundByEmailError,
@@ -14,12 +15,17 @@ from app.exceptions import (
 router = APIRouter()
 
 
-@router.post("/token")
+@router.post(
+    "/token",
+    responses={
+        401: {"model": ErrorResponse, "description": "Credenciales inválidas"},
+    },
+)
 def token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     user_service: UserServiceDep,
     jwt_service: TokenJWTServiceDep,
-):
+) -> Token:
     # Creamos las credenciales
     credencials = CredencialsUserRequest(
         email=form_data.username,
