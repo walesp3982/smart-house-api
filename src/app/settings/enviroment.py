@@ -1,6 +1,7 @@
 from enum import StrEnum
+from typing import Literal
 
-from pydantic import AnyUrl
+from pydantic import AnyUrl, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,6 +36,7 @@ class GeneralSettings(BaseSettings):
     )
     app_host: AnyUrl = AnyUrl("http://localhost:8000")
     app_name: str = "Application"
+    frontend_url: HttpUrl = HttpUrl("http:localhost:3000")
 
 
 general_settings = GeneralSettings()  # pyright: ignore[reportCallIssue]
@@ -50,3 +52,19 @@ class JWTSettings(BaseSettings):
 
 
 jwt_settings = JWTSettings()  # pyright: ignore[reportCallIssue]
+
+"""
+Helpers para url de frontend verification-email
+"""
+QueryVerifyEmail = Literal["success", "expired", "invalid"]
+
+
+def helper_url_verify_check_email(query: QueryVerifyEmail):
+    """
+    Helper que ayuda al buildar la url para obtener el resultado del email
+    """
+    global general_settings
+
+    final_url = f"{general_settings.frontend_url}/verify-email/callback/?state={query}"
+
+    return final_url
