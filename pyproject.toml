@@ -83,3 +83,4 @@ typeCheckingMode = "standard"
 [project.scripts]
 dev = "app.scripts.server:dev"
 prod = "app.scripts.server:prod"
+dev_uvicorn = "app.scripts.server:uvicorn_dev"
