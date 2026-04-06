@@ -13,6 +13,7 @@ from app.api.routes import (
     track_device,
     user,
     voice,
+    websocket,
 )
 from app.infraestructure.mqtt.client import MQTTClient
 from app.settings import general_settings
@@ -47,6 +48,7 @@ app.include_router(area.router)
 app.include_router(installed_device.router)
 app.include_router(track_device.router)
 app.include_router(voice.router)
+app.include_router(websocket.router)
 
 
 @app.get("/")
