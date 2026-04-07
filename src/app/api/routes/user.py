@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import RedirectResponse
 
-from app.api.depends import UserCurrentDep, UserServiceDep
+from app.api.depends import TokenJWTServiceDep, UserCurrentDep, UserServiceDep
 from app.api.schemas import (
     UserRegisterRequest,
     UserVerifiedStatusResponse,
@@ -8,7 +9,12 @@ from app.api.schemas import (
 )
 from app.api.schemas.general import ErrorResponse
 from app.exceptions import EmailAlreadyRegisterError
-from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
+from app.exceptions.user_exceptions import (
+    UserNotFoundByToken,
+    VerificationEmailExpired,
+    VerificationEmailInvalid,
+)
+from app.settings.enviroment import helper_url_verify_check_email
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -31,7 +37,7 @@ async def register(
         )
 
 
-@router.post(
+@router.get(
     "/me",
     responses={
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
@@ -41,7 +47,7 @@ def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
     return VisibleDataUserResponse(**actual_user.model_dump())
 
 
-@router.post(
+@router.get(
     "/verified",
     responses={
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
@@ -56,22 +62,40 @@ def get_verified_user(
 
 @router.get(
     "/email-verification/{token}",
+    status_code=status.HTTP_307_TEMPORARY_REDIRECT,
     responses={
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
         406: {"model": ErrorResponse, "description": "Validación de email inválida"},
         404: {"model": ErrorResponse, "description": "Token inválido"},
     },
 )
-def confirm_email(token: str, user_service: UserServiceDep):
+def confirm_email(
+    token: str,
+    user_service: UserServiceDep,
+    token_jwt_service: TokenJWTServiceDep,
+):
     try:
-        user_service.verified(token)
-        Response(status_code=status.HTTP_204_NO_CONTENT)
+        user = user_service.verified(token)
+        if user.id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado"
+            )
+        access_token = token_jwt_service.encode(user.id, user.name)
+
+        response = RedirectResponse(url=helper_url_verify_check_email("success"))
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite="lax",
+        )
+
+        return response
     except VerificationEmailInvalid:
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="Validación de email inválida",
-        )
+        RedirectResponse(url=helper_url_verify_check_email("invalid"))
     except UserNotFoundByToken:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Token inválido"
-        )
+        RedirectResponse(url=helper_url_verify_check_email("invalid"))
+    except VerificationEmailExpired:
+        RedirectResponse(url=helper_url_verify_check_email("expired"))

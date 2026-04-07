@@ -36,3 +36,8 @@ class UserNotFoundByToken(Exception):
 class VerificationEmailInvalid(Exception):
     def __init__(self) -> None:
         super().__init__("Verificación de email inválida")
+
+
+class VerificationEmailExpired(Exception):
+    def __init__(self) -> None:
+        super().__init__("Token expirado")

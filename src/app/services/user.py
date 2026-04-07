@@ -15,7 +15,11 @@ from app.exceptions import (
     UserNotFoundByIdError,
     UserNotFoundError,
 )
-from app.exceptions.user_exceptions import UserNotFoundByToken, VerificationEmailInvalid
+from app.exceptions.user_exceptions import (
+    UserNotFoundByToken,
+    VerificationEmailExpired,
+    VerificationEmailInvalid,
+)
 from app.repository.interfaces import UserRepositoryProtocol
 from app.settings import general_settings
 from app.settings.time import normalize, utcnow
@@ -194,7 +198,7 @@ class UserService:
             raise UserNotFoundByIdError(user_id)
         return user
 
-    def verified(self, token: str) -> None:
+    def verified(self, token: str) -> UserEntity:
         """
         Verificamos al usuario mediante el token
         """
@@ -204,9 +208,10 @@ class UserService:
         if user.verification_token_expired_at is None:
             raise VerificationEmailInvalid()
         if utcnow() < normalize(user.verification_token_expired_at):
-            raise VerificationEmailInvalid()
+            raise VerificationEmailExpired()
         user.is_verified = True
         self.repository.update(user)
+        return user
 
     def user_is_verified(self, user_id: int) -> bool:
         """

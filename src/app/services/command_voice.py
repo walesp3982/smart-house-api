@@ -31,6 +31,7 @@ class CommandVoiceService:
             raise ActionDeviceNotFound
 
         return {
+            "installed_devices_id": installed_device.id,
             "transcription": text,
             "action": action,
         }

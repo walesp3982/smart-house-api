@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.service import InstalledDeviceServiceDep
+from app.api.schemas.command import CommandJson
 from app.api.schemas.installed_device import (
     CreateInstalledDeviceRequest,
     UpdateInstalledDeviceRequest,
@@ -191,3 +192,8 @@ def delete_installed_device(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tienes permiso para eliminar este dispositivo",
         )
+
+
+@router.post("/{installed_device_id}/command", status_code=status.HTTP_202_ACCEPTED)
+def settings_installed_device(actions: CommandJson):
+    pass
