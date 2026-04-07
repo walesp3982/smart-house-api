@@ -37,7 +37,7 @@ async def register(
         )
 
 
-@router.post(
+@router.get(
     "/me",
     responses={
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
