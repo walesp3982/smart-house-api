@@ -65,6 +65,6 @@ def helper_url_verify_check_email(query: QueryVerifyEmail):
     """
     global general_settings
 
-    final_url = f"{general_settings.frontend_url}/verify-email/callback/?state={query}"
+    final_url = f"{general_settings.frontend_url}/verify-email/callback?status={query}"
 
     return final_url
