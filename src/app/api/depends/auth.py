@@ -22,12 +22,12 @@ def get_payload(
     except jwt.ExpiredSignatureError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=e.__str__,
+            detail=e.__str__(),
         )
     except jwt.InvalidTokenError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=e.__str__,
+            detail=e.__str__(),
         )
 
 
