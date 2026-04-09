@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Union
+
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.depends import HouseServiceDep, UserVerifyDep
 from app.api.schemas.house import (
@@ -6,6 +8,7 @@ from app.api.schemas.house import (
     UpdateHouseRequest,
     UpdateHouseResponse,
 )
+from app.entities.house import HouseEntity, HouseWithAreas
 from app.exceptions.house_exception import (
     HouseNotFoundByIdError,
     HouseUnathorizadedError,
@@ -15,13 +18,20 @@ router = APIRouter(prefix="/houses", tags=["Casa"])
 
 
 @router.get("")
-def get_all_house(user: UserVerifyDep, house_service: HouseServiceDep):
+def get_all_house(
+    user: UserVerifyDep,
+    house_service: HouseServiceDep,
+    include: str | None = Query(
+        None, description="Incluir recursos relacionados, ej: areas"
+    ),
+) -> Union[list[HouseWithAreas], list[HouseEntity]]:
     if user.id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Id del usuario no encontrado",
         )
-    houses = house_service.get_all_houses_own_user(user.id)
+    include_areas = include == "areas"
+    houses = house_service.get_all_houses_own_user(user.id, include_areas)
     return houses
 
 
