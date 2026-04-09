@@ -57,6 +57,49 @@ def get_installed_devices(
 
 
 @router.get(
+    "/with-devices",
+    responses={
+        200: {
+            "description": (
+                "Lista de dispositivos instalados con información del dispositivo"
+            ),
+        },
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado",
+        },
+    },
+)
+def get_installed_devices_with_device_info(
+    user: UserVerifyDep,
+    service: InstalledDeviceServiceDep,
+) -> list[InstalledDeviceWithDeviceResponse]:
+    """Obtiene installed_devices del usuario con información del dispositivo."""
+    if user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Id de usuario no encontrado",
+        )
+
+    devices = service.get_all_with_device(user.id)
+    return [
+        InstalledDeviceWithDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+            device=DeviceResponse(
+                id=device.device.id,
+                device_uuid=device.device.device_uuid,
+                type=device.device.type.value,
+            ),
+        )
+        for device in devices
+    ]
+
+
+@router.get(
     "/{installed_device_id}",
     responses={
         200: {

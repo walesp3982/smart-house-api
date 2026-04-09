@@ -39,6 +39,18 @@ class InstalledDeviceService:
         """
         return self.repository.get_all_by_user_id(user_id)
 
+    def get_all_with_device(self, user_id: int) -> list[InstalledDeviceWithDevice]:
+        """Obtiene todos los installed_devices con información del device.
+
+        Args:
+            user_id (int): ID del usuario propietario de los dispositivos.
+
+        Returns:
+            list[InstalledDeviceWithDevice]: Lista de dispositivos con info del
+            device.
+        """
+        return self.repository.get_all_with_device(user_id)
+
     def get_by_id(
         self, installed_device_id: int, user_id: int
     ) -> InstalledDeviceWithDevice:
