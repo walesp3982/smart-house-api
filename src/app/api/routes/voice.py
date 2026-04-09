@@ -3,6 +3,9 @@ import io
 import speech_recognition as sr
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
+from app.api.schemas.general import ErrorResponse
+from app.api.schemas.voice import TranscribeResponse
+
 router = APIRouter(prefix="/voice", tags=["voz"])
 
 
@@ -16,8 +19,20 @@ def parse_command(text: str):
         return {"action": "unknown", "message": "Comando no reconocido"}
 
 
-@router.post("/transcribe")
-async def transcribe_audio(file: UploadFile = File(...)):
+@router.post(
+    "/transcribe",
+    responses={
+        200: {
+            "description": "Transcripción y comando procesado exitosamente",
+        },
+        400: {
+            "model": ErrorResponse,
+            "description": "Archivo no válido o audio no reconocido",
+        },
+        500: {"model": ErrorResponse, "description": "Error interno del servidor"},
+    },
+)
+async def transcribe_audio(file: UploadFile = File(...)) -> TranscribeResponse:
 
     if file.filename is None:
         raise HTTPException(
@@ -38,7 +53,12 @@ async def transcribe_audio(file: UploadFile = File(...)):
             audio_data = recognizer.record(source)
         text = recognizer.recognize_google(audio_data, language="es-ES")  # type: ignore
         command = parse_command(text)
-        return {"transcription": text, **command}
+        return TranscribeResponse(
+            transcription=text,
+            action=command["action"],
+            device=command.get("device"),
+            message=command["message"],
+        )
     except sr.UnknownValueError:
         raise HTTPException(status_code=400, detail="No se pudo reconocer el audio")
     except sr.RequestError as e:

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.service import AreaServiceDep, HouseServiceDep
 from app.api.schemas.area import AreaResponse, CreateAreaRequest, UpdateAreaRequest
+from app.api.schemas.general import ErrorResponse
 from app.exceptions.areas_exceptions import (
     AreaNotFoundByIdError,
     DuplicateNameAreaError,
@@ -33,7 +34,16 @@ def verify_house_ownership(
 router = APIRouter(tags=["Areas"])
 
 
-@router.get("/houses/{house_id}/areas", response_model=list[AreaResponse])
+@router.get(
+    "/houses/{house_id}/areas",
+    response_model=list[AreaResponse],
+    responses={
+        200: {"model": list[AreaResponse], "description": "Lista de áreas de la casa"},
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+        403: {"model": ErrorResponse, "description": "No tienes acceso a esta casa"},
+        404: {"model": ErrorResponse, "description": "Casa no encontrada"},
+    },
+)
 def get_areas_by_house(
     house_id: int, area_service: AreaServiceDep, _=Depends(verify_house_ownership)
 ):
@@ -42,7 +52,16 @@ def get_areas_by_house(
     return [AreaResponse.from_entity(area) for area in areas]
 
 
-@router.get("/houses/{house_id}/areas/{area_id}", response_model=AreaResponse)
+@router.get(
+    "/houses/{house_id}/areas/{area_id}",
+    response_model=AreaResponse,
+    responses={
+        200: {"model": AreaResponse, "description": "Área encontrada"},
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+        403: {"model": ErrorResponse, "description": "No tienes acceso a esta casa"},
+        404: {"model": ErrorResponse, "description": "Casa o área no encontrada"},
+    },
+)
 def get_area_by_id(
     house_id: int,
     area_id: int,
@@ -57,7 +76,23 @@ def get_area_by_id(
         raise HTTPException(status_code=404, detail="Área no encontrada")
 
 
-@router.post("/houses/{house_id}/areas", response_model=AreaResponse)
+@router.post(
+    "/houses/{house_id}/areas",
+    response_model=AreaResponse,
+    responses={
+        200: {"model": AreaResponse, "description": "Área creada exitosamente"},
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado o datos inválidos",
+        },
+        403: {"model": ErrorResponse, "description": "No tienes acceso a esta casa"},
+        404: {"model": ErrorResponse, "description": "Casa no encontrada"},
+        409: {
+            "model": ErrorResponse,
+            "description": "Nombre de área duplicado en la casa",
+        },
+    },
+)
 def create_area(
     house_id: int,
     request: CreateAreaRequest,
@@ -73,7 +108,19 @@ def create_area(
         raise HTTPException(status_code=409, detail=str(e))
 
 
-@router.patch("/houses/{house_id}/areas/{area_id}", response_model=AreaResponse)
+@router.patch(
+    "/houses/{house_id}/areas/{area_id}",
+    response_model=AreaResponse,
+    responses={
+        200: {"model": AreaResponse, "description": "Área actualizada exitosamente"},
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado",
+        },
+        403: {"model": ErrorResponse, "description": "No tienes acceso a esta casa"},
+        404: {"model": ErrorResponse, "description": "Casa o área no encontrada"},
+    },
+)
 def patch_area(
     house_id: int,
     area_id: int,
@@ -96,7 +143,16 @@ def patch_area(
         raise HTTPException(status_code=409, detail=str(e))
 
 
-@router.delete("/houses/{house_id}/areas/{area_id}")
+@router.delete(
+    "/houses/{house_id}/areas/{area_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Área eliminada exitosamente"},
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+        403: {"model": ErrorResponse, "description": "No tienes acceso a esta casa"},
+        404: {"model": ErrorResponse, "description": "Casa o área no encontrada"},
+    },
+)
 def delete_area(
     house_id: int,
     area_id: int,
