@@ -17,4 +17,4 @@ def get_mqtt_provider() -> MQTTProvider:
     return MQTTProvider(client)
 
 
-MQTTProviderDep = Annotated[MQTTProvider, Depends(MQTTProvider)]
+MQTTProviderDep = Annotated[MQTTProvider, Depends(get_mqtt_provider)]
