@@ -4,7 +4,7 @@ from app.infraestructure.mqtt.provider import MQTTProvider
 from app.services.installed_device import InstalledDeviceService
 
 
-class CommandDevice:
+class CommandDeviceService:
     def __init__(
         self,
         installed_device_service: InstalledDeviceService,
@@ -15,7 +15,7 @@ class CommandDevice:
 
     def execute_command(
         self, installed_device_id: int, user_id: int, request: CommandJson
-    ) -> bool:
+    ) -> None:
         """
         Obtenemos le installed_device_id y ejecutamos la acción utilizando mqtt broker
 
@@ -39,4 +39,3 @@ class CommandDevice:
 
         topic = f"/{installed_device.device.device_uuid}/action"
         self.mqtt_provider.publish(topic, request.model_dump())
-        return True

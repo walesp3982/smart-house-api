@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
+from starlette.status import HTTP_400_BAD_REQUEST
 
 from app.api.depends.auth import UserVerifyDep
-from app.api.depends.service import InstalledDeviceServiceDep
+from app.api.depends.service import CommandDeviceServiceDep, InstalledDeviceServiceDep
 from app.api.schemas.command import CommandJson
 from app.api.schemas.general import ErrorResponse
 from app.api.schemas.installed_device import (
@@ -11,6 +12,7 @@ from app.api.schemas.installed_device import (
     InstalledDeviceWithDeviceResponse,
     UpdateInstalledDeviceRequest,
 )
+from app.exceptions.command_exception import IncorrectRequestCommandError
 from app.exceptions.installed_device_exceptions import (
     InstalledDeviceAlreadyRegisteredError,
     InstalledDeviceNotFoundByIdError,
@@ -289,5 +291,28 @@ def delete_installed_device(
         },
     },
 )
-def settings_installed_device(actions: CommandJson):
-    pass
+def settings_installed_device(
+    installed_device_id: int,
+    actions: CommandJson,
+    user: UserVerifyDep,
+    command_device_service: CommandDeviceServiceDep,
+):
+    try:
+        if user.id is not None:
+            command_device_service.execute_command(
+                installed_device_id, user.id, actions
+            )
+    except IncorrectRequestCommandError:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="El dispositivo no admite el comando",
+        )
+    except InstalledDeviceNotFoundByIdError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo no encontrado"
+        )
+    except InstalledDeviceUnauthorizedError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuario no autorizado para el dispositivo",
+        )
