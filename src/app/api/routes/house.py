@@ -1,6 +1,6 @@
-from typing import Union
+from typing import cast
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, status
 
 from app.api.depends import HouseServiceDep, UserVerifyDep
 from app.api.schemas.general import ErrorResponse
@@ -21,25 +21,45 @@ router = APIRouter(prefix="/houses", tags=["Casa"])
 @router.get(
     "",
     responses={
-        200: {"description": "Lista de casas del usuario, opcionalmente con áreas "},
+        200: {"description": "Lista de casas del usuario"},
         401: {"model": ErrorResponse, "description": "Usuario no autenticado"},
     },
 )
-def get_all_house(
+def get_all_houses(
     user: UserVerifyDep,
     house_service: HouseServiceDep,
-    include: str | None = Query(
-        None, description="Incluir recursos relacionados, ej: areas"
-    ),
-) -> Union[list[HouseWithAreas], list[HouseEntity]]:
+) -> list[HouseEntity]:
     if user.id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Id del usuario no encontrado",
         )
-    include_areas = include == "areas"
-    houses = house_service.get_all_houses_own_user(user.id, include_areas)
-    return houses
+    return cast(
+        list[HouseEntity],
+        house_service.get_all_houses_own_user(user.id, include_areas=False),
+    )
+
+
+@router.get(
+    "/with-areas",
+    responses={
+        200: {"description": "Lista de casas del usuario con áreas"},
+        401: {"model": ErrorResponse, "description": "Usuario no autenticado"},
+    },
+)
+def get_all_houses_with_areas(
+    user: UserVerifyDep,
+    house_service: HouseServiceDep,
+) -> list[HouseWithAreas]:
+    if user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Id del usuario no encontrado",
+        )
+    return cast(
+        list[HouseWithAreas],
+        house_service.get_all_houses_own_user(user.id, include_areas=True),
+    )
 
 
 @router.get(
