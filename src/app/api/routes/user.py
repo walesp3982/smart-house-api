@@ -56,7 +56,7 @@ def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
 
 
 @router.get(
-    "/verified",
+    "/verified/{user_id}",
     responses={
         200: {
             "model": UserVerifiedStatusResponse,
