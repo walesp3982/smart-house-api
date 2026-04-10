@@ -19,6 +19,10 @@ from app.services import (
     TrackDeviceService,
     UserService,
 )
+from app.services.command_device import CommandDeviceService
+from app.services.status_device import StateDeviceService
+
+from .mqtt import MQTTProviderDep
 
 TokenJWTServiceDep = Annotated[TokenJWTService, Depends()]
 
@@ -74,3 +78,28 @@ def get_track_device_service(
 
 
 TrackDeviceServiceDep = Annotated[TrackDeviceService, Depends(get_track_device_service)]
+
+
+def get_command_device_service(
+    installed_device_service: InstalledDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
+):
+    return CommandDeviceService(installed_device_service, mqtt_provider)
+
+
+CommandDeviceServiceDep = Annotated[
+    CommandDeviceService, Depends(get_command_device_service)
+]
+
+
+def get_state_device_service(
+    installed_device_service: InstalledDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
+):
+    return StateDeviceService(installed_device_service, mqtt_provider)
+
+
+StateDeviceServiceDep = Annotated[
+    StateDeviceService,
+    Depends(get_state_device_service),
+]

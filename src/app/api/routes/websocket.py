@@ -1,15 +1,58 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+import asyncio
+import secrets
+
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Query,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
+
+from app.api.depends.auth import UserVerifyDep
+from app.api.depends.service import StateDeviceServiceDep
 
 router = APIRouter()
 
+ws_tickets: dict[str, int] = {}
 
-@router.websocket("/ws/eco")
-async def websocket_endpoint(websocket: WebSocket):
+
+async def expire_ticket(ticket: str, seconds: int):
+    await asyncio.sleep(seconds)
+    ws_tickets.pop(ticket, None)
+
+
+@router.post("/auth/ws-ticket")
+async def get_ws_ticket(user: UserVerifyDep):
+    ticket = secrets.token_urlsafe(32)
+    if user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Id del usuario no encontrado",
+        )
+    ws_tickets[ticket] = user.id
+    asyncio.create_task(expire_ticket(ticket, 30))
+    return {"ticket": ticket}
+
+
+@router.websocket("/ws/{installed_device}")
+async def state_device(
+    websocket: WebSocket,
+    installed_device_id: int,
+    state_device_service: StateDeviceServiceDep,
+    ticket: str = Query(...),
+):
+    user_id = ws_tickets.pop(ticket, None)
+    if not user_id:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
     await websocket.accept()
     try:
         while True:
-            data = await websocket.receive_text()
-
-            await websocket.send_text(f"eco: {data}")
+            state = state_device_service.execute(user_id, installed_device_id)
+            await asyncio.sleep(0.2)
+            await websocket.send_json(state)
     except WebSocketDisconnect:
         pass

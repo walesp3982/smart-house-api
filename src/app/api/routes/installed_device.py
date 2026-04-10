@@ -1,12 +1,18 @@
 from fastapi import APIRouter, HTTPException, status
+from starlette.status import HTTP_400_BAD_REQUEST
 
 from app.api.depends.auth import UserVerifyDep
-from app.api.depends.service import InstalledDeviceServiceDep
+from app.api.depends.service import CommandDeviceServiceDep, InstalledDeviceServiceDep
 from app.api.schemas.command import CommandJson
+from app.api.schemas.general import ErrorResponse
 from app.api.schemas.installed_device import (
     CreateInstalledDeviceRequest,
+    DeviceResponse,
+    InstalledDeviceResponse,
+    InstalledDeviceWithDeviceResponse,
     UpdateInstalledDeviceRequest,
 )
+from app.exceptions.command_exception import IncorrectRequestCommandError
 from app.exceptions.installed_device_exceptions import (
     InstalledDeviceAlreadyRegisteredError,
     InstalledDeviceNotFoundByIdError,
@@ -17,11 +23,19 @@ from app.exceptions.installed_device_exceptions import (
 router = APIRouter(prefix="/installed_devices", tags=["Installed Devices"])
 
 
-@router.get("", response_model=list[dict])
+@router.get(
+    "",
+    responses={
+        200: {
+            "description": "Lista de dispositivos instalados del usuario",
+        },
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+    },
+)
 def get_installed_devices(
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
-):
+) -> list[InstalledDeviceResponse]:
     """Obtiene todos los installed_devices del usuario autenticado."""
     if user.id is None:
         raise HTTPException(
@@ -31,23 +45,82 @@ def get_installed_devices(
 
     devices = service.get_all(user.id)
     return [
-        {
-            "id": device.id,
-            "name": device.name,
-            "device_id": device.device_id,
-            "house_id": device.house_id,
-            "area_id": device.area_id,
-        }
+        InstalledDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+        )
         for device in devices
     ]
 
 
-@router.get("/{installed_device_id}", response_model=dict)
+@router.get(
+    "/with-devices",
+    responses={
+        200: {
+            "description": (
+                "Lista de dispositivos instalados con información del dispositivo"
+            ),
+        },
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado",
+        },
+    },
+)
+def get_installed_devices_with_device_info(
+    user: UserVerifyDep,
+    service: InstalledDeviceServiceDep,
+) -> list[InstalledDeviceWithDeviceResponse]:
+    """Obtiene installed_devices del usuario con información del dispositivo."""
+    if user.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Id de usuario no encontrado",
+        )
+
+    devices = service.get_all_with_device(user.id)
+    return [
+        InstalledDeviceWithDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+            device=DeviceResponse(
+                id=device.device.id,
+                device_uuid=device.device.device_uuid,
+                type=device.device.type.value,
+            ),
+        )
+        for device in devices
+    ]
+
+
+@router.get(
+    "/{installed_device_id}",
+    responses={
+        200: {
+            "description": "Dispositivo encontrado con información del dispositivo",
+        },
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+        404: {
+            "model": ErrorResponse,
+            "description": "Dispositivo instalado no encontrado",
+        },
+        403: {
+            "model": ErrorResponse,
+            "description": "No autorizado para acceder al dispositivo",
+        },
+    },
+)
 def get_installed_device(
     installed_device_id: int,
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
-):
+) -> InstalledDeviceWithDeviceResponse:
     """Obtiene un installed_device con join a device."""
     if user.id is None:
         raise HTTPException(
@@ -57,18 +130,18 @@ def get_installed_device(
 
     try:
         device = service.get_by_id(installed_device_id, user.id)
-        return {
-            "id": device.id,
-            "name": device.name,
-            "device_id": device.device_id,
-            "house_id": device.house_id,
-            "area_id": device.area_id,
-            "device": {
-                "id": device.device.id,
-                "device_uuid": device.device.device_uuid,
-                "type": device.device.type.value,
-            },
-        }
+        return InstalledDeviceWithDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+            device=DeviceResponse(
+                id=device.device.id,
+                device_uuid=device.device.device_uuid,
+                type=device.device.type.value,
+            ),
+        )
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -81,12 +154,29 @@ def get_installed_device(
         )
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=dict)
+@router.post(
+    "",
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {
+            "description": "Dispositivo instalado registrado exitosamente",
+        },
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado o datos inválidos",
+        },
+        409: {"model": ErrorResponse, "description": "Dispositivo ya registrado"},
+        500: {
+            "model": ErrorResponse,
+            "description": "Error interno al crear el dispositivo",
+        },
+    },
+)
 def register_installed_device(
     request: CreateInstalledDeviceRequest,
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
-):
+) -> InstalledDeviceResponse:
     """Registra un nuevo installed_device con uuid y código de verificación."""
     if user.id is None:
         raise HTTPException(
@@ -102,13 +192,13 @@ def register_installed_device(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error al crear el dispositivo",
             )
-        return {
-            "id": device.id,
-            "name": device.name,
-            "device_id": device.device_id,
-            "house_id": device.house_id,
-            "area_id": device.area_id,
-        }
+        return InstalledDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+        )
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -126,13 +216,32 @@ def register_installed_device(
         )
 
 
-@router.patch("/{installed_device_id}", response_model=dict)
+@router.patch(
+    "/{installed_device_id}",
+    responses={
+        200: {
+            "description": "Dispositivo instalado actualizado exitosamente",
+        },
+        400: {
+            "model": ErrorResponse,
+            "description": "ID de usuario no encontrado o datos inválidos",
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Dispositivo instalado no encontrado",
+        },
+        403: {
+            "model": ErrorResponse,
+            "description": "No autorizado para acceder al dispositivo",
+        },
+    },
+)
 def update_installed_device(
     installed_device_id: int,
     request: UpdateInstalledDeviceRequest,
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
-):
+) -> InstalledDeviceResponse:
     """Actualiza un installed_device (name, house_id, area_id)."""
     if user.id is None:
         raise HTTPException(
@@ -148,13 +257,13 @@ def update_installed_device(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error al actualizar el dispositivo",
             )
-        return {
-            "id": device.id,
-            "name": device.name,
-            "device_id": device.device_id,
-            "house_id": device.house_id,
-            "area_id": device.area_id,
-        }
+        return InstalledDeviceResponse(
+            id=device.id,
+            name=device.name,
+            device_id=device.device_id,
+            house_id=device.house_id,
+            area_id=device.area_id,
+        )
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -167,7 +276,22 @@ def update_installed_device(
         )
 
 
-@router.delete("/{installed_device_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{installed_device_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {"description": "Dispositivo instalado eliminado exitosamente"},
+        400: {"model": ErrorResponse, "description": "ID de usuario no encontrado"},
+        404: {
+            "model": ErrorResponse,
+            "description": "Dispositivo instalado no encontrado",
+        },
+        403: {
+            "model": ErrorResponse,
+            "description": "No autorizado para acceder al dispositivo",
+        },
+    },
+)
 def delete_installed_device(
     installed_device_id: int,
     user: UserVerifyDep,
@@ -194,6 +318,44 @@ def delete_installed_device(
         )
 
 
-@router.post("/{installed_device_id}/command", status_code=status.HTTP_202_ACCEPTED)
-def settings_installed_device(actions: CommandJson):
-    pass
+@router.post(
+    "/{installed_device_id}/command",
+    status_code=status.HTTP_202_ACCEPTED,
+    responses={
+        202: {"description": "Comando enviado al dispositivo"},
+        400: {"model": ErrorResponse, "description": "Datos del comando inválidos"},
+        404: {
+            "model": ErrorResponse,
+            "description": "Dispositivo instalado no encontrado",
+        },
+        403: {
+            "model": ErrorResponse,
+            "description": "No autorizado para acceder al dispositivo",
+        },
+    },
+)
+def settings_installed_device(
+    installed_device_id: int,
+    actions: CommandJson,
+    user: UserVerifyDep,
+    command_device_service: CommandDeviceServiceDep,
+):
+    try:
+        if user.id is not None:
+            command_device_service.execute_command(
+                installed_device_id, user.id, actions
+            )
+    except IncorrectRequestCommandError:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="El dispositivo no admite el comando",
+        )
+    except InstalledDeviceNotFoundByIdError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo no encontrado"
+        )
+    except InstalledDeviceUnauthorizedError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuario no autorizado para el dispositivo",
+        )

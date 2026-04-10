@@ -1,4 +1,7 @@
 from functools import lru_cache
+from typing import Annotated
+
+from fastapi import Depends
 
 from app.infraestructure.mqtt.client import MQTTClient
 from app.infraestructure.mqtt.provider import MQTTProvider
@@ -12,3 +15,6 @@ def get_mqtt_provider() -> MQTTProvider:
     """
     client = MQTTClient.get()
     return MQTTProvider(client)
+
+
+MQTTProviderDep = Annotated[MQTTProvider, Depends(get_mqtt_provider)]

@@ -118,6 +118,47 @@ class InstalledDeviceRepository:
         device = DeviceEntity(**device_data)
         return InstalledDeviceWithDevice(**installed_device_data, device=device)
 
+    def get_all_with_device(self, user_id: int) -> list[InstalledDeviceWithDevice]:
+        """Obtiene todos los installed_devices de un usuario con su device."""
+        query = (
+            select(installed_devices, devices)
+            .select_from(
+                join(
+                    installed_devices,
+                    devices,
+                    installed_devices.c.device_id == devices.c.id,
+                )
+            )
+            .where(installed_devices.c.user_id == user_id)
+        )
+
+        results = self.conn.execute(query).mappings().all()
+
+        devices_list = []
+        for result in results:
+            installed_device_data = {
+                "id": result.id,
+                "name": result.name,
+                "device_id": result.device_id,
+                "house_id": result.house_id,
+                "area_id": result.area_id,
+                "user_id": result.user_id,
+            }
+
+            device_data = {
+                "id": result.id_1,
+                "device_uuid": result.device_uuid,
+                "activation_code": result.activation_code,
+                "type": result.type,
+            }
+
+            device = DeviceEntity(**device_data)
+            devices_list.append(
+                InstalledDeviceWithDevice(**installed_device_data, device=device)
+            )
+
+        return devices_list
+
     def get_by_uuid(self, uuid: str) -> InstalledDeviceEntity | None:
         """Obtiene un installed_device por el uuid del device."""
         query = (

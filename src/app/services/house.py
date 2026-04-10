@@ -1,5 +1,8 @@
+from typing import Union
+
 from app.api.schemas.house import CreateHouseRequest, UpdateHouseRequest
 from app.entities import HouseEntity
+from app.entities.house import HouseWithAreas
 from app.exceptions.house_exception import (
     HouseNotFoundByIdError,
     HouseUnathorizadedError,
@@ -35,15 +38,21 @@ class HouseService:
             raise Exception
         return house
 
-    def get_all_houses_own_user(self, user_id: int) -> list[HouseEntity]:
+    def get_all_houses_own_user(
+        self, user_id: int, include_areas: bool = False
+    ) -> Union[list[HouseEntity], list[HouseWithAreas]]:
         """
         Regresa todas las casa que pertenecen a un usuario
         Args:
             user_id: id del usuario
+            include_areas: si incluir las áreas de cada casa
         Return:
-            list[HouseEntity]: Lista de casas pertenecientes a un usuario
+            list[HouseEntity] o list[HouseWithAreas]: Lista de casas pertenecientes a un
+            usuario
         """
-        houses = self.repository.get_all(FilterGetAllHouse(user_id=user_id))
+        houses = self.repository.get_all(
+            FilterGetAllHouse(user_id=user_id, include_areas=include_areas)
+        )
         return houses
 
     def get_house_by_id(self, house_id: int, user_id: int) -> HouseEntity:

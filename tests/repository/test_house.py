@@ -1,6 +1,8 @@
 import pytest
 
 from app.entities import HouseEntity
+from app.entities.areas import AreaEntity, AreaType
+from app.entities.house import HouseWithAreas
 from app.exceptions.house_exception import HouseIdNotStarted, HouseNotFoundByIdError
 from app.repository.interfaces.house import FilterGetAllHouse
 
@@ -137,3 +139,25 @@ def test_failed_house(house_repo, user_id):
 
     with pytest.raises(HouseNotFoundByIdError):
         house_repo.delete(house_id)
+
+
+def test_get_all_with_include_areas(house_repo, area_repo, create_house):
+    house_id = create_house(name="Casa con áreas")
+
+    # Crear áreas para la casa
+    area1 = AreaEntity(name="Sala", type=AreaType.living_room, house_id=house_id)
+    area2 = AreaEntity(name="Cocina", type=AreaType.kitchen, house_id=house_id)
+    area_repo.create(area1)
+    area_repo.create(area2)
+
+    # Obtener casas con áreas incluidas
+    houses_with_areas = house_repo.get_all(FilterGetAllHouse(include_areas=True))
+
+    assert len(houses_with_areas) == 1
+    house = houses_with_areas[0]
+    assert isinstance(house, HouseWithAreas)
+    assert house.id == house_id
+    assert len(house.areas) == 2
+    area_names = [area.name for area in house.areas]
+    assert "Sala" in area_names
+    assert "Cocina" in area_names

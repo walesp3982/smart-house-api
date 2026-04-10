@@ -22,7 +22,11 @@ router = APIRouter(prefix="/users", tags=["users"])
 @router.post(
     "/register",
     responses={
-        400: {"model": ErrorResponse, "description": "Email duplicado"},
+        200: {
+            "model": VisibleDataUserResponse,
+            "description": "Usuario registrado exitosamente",
+        },
+        400: {"model": ErrorResponse, "description": "Email ya registrado"},
     },
 )
 async def register(
@@ -40,7 +44,11 @@ async def register(
 @router.get(
     "/me",
     responses={
-        401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
+        200: {
+            "model": VisibleDataUserResponse,
+            "description": "Información del usuario actual",
+        },
+        401: {"model": ErrorResponse, "description": "Usuario no autenticado"},
     },
 )
 def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
@@ -48,8 +56,12 @@ def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
 
 
 @router.get(
-    "/verified",
+    "/verified/{user_id}",
     responses={
+        200: {
+            "model": UserVerifiedStatusResponse,
+            "description": "Estado de verificación del usuario",
+        },
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
     },
 )
@@ -73,7 +85,7 @@ def confirm_email(
     token: str,
     user_service: UserServiceDep,
     token_jwt_service: TokenJWTServiceDep,
-):
+) -> RedirectResponse:
     try:
         user = user_service.verified(token)
         if user.id is None:
@@ -94,8 +106,8 @@ def confirm_email(
 
         return response
     except VerificationEmailInvalid:
-        RedirectResponse(url=helper_url_verify_check_email("invalid"))
+        return RedirectResponse(url=helper_url_verify_check_email("invalid"))
     except UserNotFoundByToken:
-        RedirectResponse(url=helper_url_verify_check_email("invalid"))
+        return RedirectResponse(url=helper_url_verify_check_email("invalid"))
     except VerificationEmailExpired:
-        RedirectResponse(url=helper_url_verify_check_email("expired"))
+        return RedirectResponse(url=helper_url_verify_check_email("expired"))

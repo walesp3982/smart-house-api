@@ -1,7 +1,12 @@
 from .auth import Payload
 from .device import CreateDeviceRequest
 from .general import ErrorResponse
-from .installed_device import CreateInstalledDeviceRequest, UpdateInstalledDeviceRequest
+from .installed_device import (
+    CreateInstalledDeviceRequest,
+    InstalledDeviceResponse,
+    InstalledDeviceWithDeviceResponse,
+    UpdateInstalledDeviceRequest,
+)
 from .track_device import TrackDeviceResponse
 from .user import (
     CredencialsUserRequest,
@@ -9,6 +14,7 @@ from .user import (
     UserVerifiedStatusResponse,
     VisibleDataUserResponse,
 )
+from .voice import TranscribeResponse
 
 __all__ = [
     "CredencialsUserRequest",
@@ -18,7 +24,10 @@ __all__ = [
     "UserVerifiedStatusResponse",
     "CreateDeviceRequest",
     "CreateInstalledDeviceRequest",
+    "InstalledDeviceResponse",
+    "InstalledDeviceWithDeviceResponse",
     "TrackDeviceResponse",
+    "TranscribeResponse",
     "UpdateInstalledDeviceRequest",
     "ErrorResponse",
 ]

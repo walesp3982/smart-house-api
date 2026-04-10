@@ -18,6 +18,7 @@ router = APIRouter()
 @router.post(
     "/token",
     responses={
+        200: {"model": Token, "description": "Token de acceso generado"},
         401: {"model": ErrorResponse, "description": "Credenciales inválidas"},
     },
 )
