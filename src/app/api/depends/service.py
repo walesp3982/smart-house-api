@@ -20,6 +20,7 @@ from app.services import (
     UserService,
 )
 from app.services.command_device import CommandDeviceService
+from app.services.status_device import StateDeviceService
 
 from .mqtt import MQTTProviderDep
 
@@ -88,4 +89,17 @@ def get_command_device_service(
 
 CommandDeviceServiceDep = Annotated[
     CommandDeviceService, Depends(get_command_device_service)
+]
+
+
+def get_state_device_service(
+    installed_device_service: InstalledDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
+):
+    return StateDeviceService(installed_device_service, mqtt_provider)
+
+
+StateDeviceServiceDep = Annotated[
+    StateDeviceService,
+    Depends(get_state_device_service),
 ]
