@@ -20,7 +20,7 @@ class MQTTProvider:
     def _on_connect(self, client: mqtt.Client, userdata, flags, rc):
         if rc == 0:
             # Suscribirse a TODOS los topics al conectar (y al reconectar)
-            client.subscribe("#")
+            client.subscribe("#", qos=1)
 
     def _on_message(self, client, userdata, msg: mqtt.MQTTMessage):
         payload_raw = msg.payload.decode("utf-8")
