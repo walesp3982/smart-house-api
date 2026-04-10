@@ -1,0 +1,13 @@
+{% extends "email/base.html" %}
+{% from "email/macros/components.html" import button, link_fallback, warning %}
+
+
+{% block content %}
+  <h2 style="color: #2d3748; margin-top: 0;">¡Verifica tu correo electrónico!</h2>
+  <p style="color: #4a5568; font-size: 16px;">Hola <b>{{ name }}</b>,</p>
+  <p style="color: #4a5568; font-size: 15px;">Gracias por registrarte en Smart House. Para completar tu registro, haz clic en el siguiente botón:</p>
+
+  {{ button(url, "Verificar mi correo") }}
+  {{ link_fallback(url) }}
+  {{ warning("Si no solicitaste esta verificación, puedes ignorar este correo. Tu cuenta no será activada hasta que completes la verificación.") }}
+{% endblock %}
