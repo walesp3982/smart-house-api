@@ -9,14 +9,14 @@ class InstalledDeviceNotFoundByIdError(InstalledDeviceException):
 
     def __init__(self, id: int):
         self.id = id
-        super().__init__(f"Installed device with id {id} not found")
+        super().__init__(f"Dispositivo con {id} not encontrado")
 
 
 class InstalledDeviceEntityIdNotStartedError(InstalledDeviceException):
     """Exception raised when trying to update an installed device without an id"""
 
     def __init__(self):
-        super().__init__("Installed device entity id not started")
+        super().__init__("Id del dispositivo no fue inicializado")
 
 
 class InstalledDeviceAlreadyRegisteredError(InstalledDeviceException):
@@ -26,7 +26,7 @@ class InstalledDeviceAlreadyRegisteredError(InstalledDeviceException):
     def __init__(self, uuid: str):
         self.uuid = uuid
         super().__init__(
-            f"Device with uuid {uuid} is already registered by another user"
+            f"El dispositivo con uuid {uuid} ya fue registrado por otro usuario"
         )
 
 
@@ -34,7 +34,7 @@ class InstalledDeviceVerificationError(InstalledDeviceException):
     """Exception raised when verification code is invalid"""
 
     def __init__(self):
-        super().__init__("Invalid verification code for this device")
+        super().__init__("Código de verificación inválido")
 
 
 class InstalledDeviceUnauthorizedError(InstalledDeviceException):
@@ -43,6 +43,6 @@ class InstalledDeviceUnauthorizedError(InstalledDeviceException):
     def __init__(self, installed_device_id: int):
         self.id = installed_device_id
         super().__init__(
-            "You do not have permission to access installed device"
-            + f"with id {installed_device_id}"
+            "No tienes permiso para manejar este dispositivo"
+            + f"con id {installed_device_id}"
         )
