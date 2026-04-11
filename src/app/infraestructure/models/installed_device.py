@@ -1,4 +1,12 @@
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    UniqueConstraint,
+)
 
 from .base import metadata
 
@@ -47,4 +55,5 @@ installed_devices = Table(
         "area_id IS NULL OR house_id IS NOT NULL",
         name="chkk_area_requires_house",
     ),
+    UniqueConstraint("device_id", name="uq_installed_device_device_id"),
 )
