@@ -114,7 +114,7 @@ class InstalledDeviceService:
 
         # Verificar que ningún otro usuario tenga este device registrado
         existing = self.repository.get_by_uuid(request.uuid)
-        if existing is not None and existing.user_id != user_id:
+        if existing is not None:
             raise InstalledDeviceAlreadyRegisteredError(request.uuid)
 
         # Crear el installed_device
