@@ -1,16 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.entities import AreaEntity, AreaType
 from app.exceptions.areas_exceptions import AreaEntityIdNotStartedError
 
 
 class UpdateAreaRequest(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=50)
     type: AreaType | None = None
 
 
 class CreateAreaRequest(BaseModel):
-    name: str
+    name: str = Field(max_length=50)
     type: AreaType
 
 

@@ -1,9 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class CredencialsUserRequest(BaseModel):
-    email: EmailStr
-    password: str
+    email: EmailStr = Field(max_length=50)
+    password: str = Field(max_length=64)
 
 
 class VisibleDataUserResponse(BaseModel):
@@ -14,9 +14,9 @@ class VisibleDataUserResponse(BaseModel):
 
 
 class UserRegisterRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
+    name: str = Field(max_length=50)
+    email: EmailStr = Field(max_length=50)
+    password: str = Field(max_length=64)
 
 
 class UserVerifiedStatusResponse(BaseModel):
