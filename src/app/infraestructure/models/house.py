@@ -6,7 +6,7 @@ houses = Table(
     "houses",
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(12), nullable=False),
+    Column("name", String(50), nullable=False),
     Column(
         "user_id",
         ForeignKey("users.id", name="fk_houses_user_id", ondelete="CASCADE"),

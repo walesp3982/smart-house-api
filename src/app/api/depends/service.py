@@ -83,8 +83,9 @@ TrackDeviceServiceDep = Annotated[TrackDeviceService, Depends(get_track_device_s
 def get_command_device_service(
     installed_device_service: InstalledDeviceServiceDep,
     mqtt_provider: MQTTProviderDep,
+    track_service: TrackDeviceServiceDep,
 ):
-    return CommandDeviceService(installed_device_service, mqtt_provider)
+    return CommandDeviceService(installed_device_service, mqtt_provider, track_service)
 
 
 CommandDeviceServiceDep = Annotated[
