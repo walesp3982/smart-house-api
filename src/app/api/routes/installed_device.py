@@ -7,7 +7,6 @@ from app.api.schemas.command import CommandJson
 from app.api.schemas.general import ErrorResponse
 from app.api.schemas.installed_device import (
     CreateInstalledDeviceRequest,
-    DeviceResponse,
     InstalledDeviceResponse,
     InstalledDeviceWithDeviceResponse,
     UpdateInstalledDeviceRequest,
@@ -44,16 +43,7 @@ def get_installed_devices(
         )
 
     devices = service.get_all(user.id)
-    return [
-        InstalledDeviceResponse(
-            id=device.id,
-            name=device.name,
-            device_id=device.device_id,
-            house_id=device.house_id,
-            area_id=device.area_id,
-        )
-        for device in devices
-    ]
+    return [InstalledDeviceResponse.from_entity(device) for device in devices]
 
 
 @router.get(
@@ -83,18 +73,7 @@ def get_installed_devices_with_device_info(
 
     devices = service.get_all_with_device(user.id)
     return [
-        InstalledDeviceWithDeviceResponse(
-            id=device.id,
-            name=device.name,
-            device_id=device.device_id,
-            house_id=device.house_id,
-            area_id=device.area_id,
-            device=DeviceResponse(
-                id=device.device.id,
-                device_uuid=device.device.device_uuid,
-                type=device.device.type.value,
-            ),
-        )
+        InstalledDeviceWithDeviceResponse.from_entity_compound(device)
         for device in devices
     ]
 
@@ -130,18 +109,7 @@ def get_installed_device(
 
     try:
         device = service.get_by_id(installed_device_id, user.id)
-        return InstalledDeviceWithDeviceResponse(
-            id=device.id,
-            name=device.name,
-            device_id=device.device_id,
-            house_id=device.house_id,
-            area_id=device.area_id,
-            device=DeviceResponse(
-                id=device.device.id,
-                device_uuid=device.device.device_uuid,
-                type=device.device.type.value,
-            ),
-        )
+        return InstalledDeviceWithDeviceResponse.from_entity_compound(device)
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -192,13 +160,7 @@ def register_installed_device(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error al crear el dispositivo",
             )
-        return InstalledDeviceResponse(
-            id=device.id,
-            name=device.name,
-            device_id=device.device_id,
-            house_id=device.house_id,
-            area_id=device.area_id,
-        )
+        return InstalledDeviceResponse.from_entity(device)
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -257,13 +219,7 @@ def update_installed_device(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error al actualizar el dispositivo",
             )
-        return InstalledDeviceResponse(
-            id=device.id,
-            name=device.name,
-            device_id=device.device_id,
-            house_id=device.house_id,
-            area_id=device.area_id,
-        )
+        return InstalledDeviceResponse.from_entity(device)
     except InstalledDeviceNotFoundByIdError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
