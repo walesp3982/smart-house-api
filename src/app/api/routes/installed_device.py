@@ -296,7 +296,7 @@ def delete_installed_device(
     installed_device_id: int,
     user: UserVerifyDep,
     service: InstalledDeviceServiceDep,
-):
+) -> None:
     """Elimina un installed_device."""
     if user.id is None:
         raise HTTPException(
@@ -339,7 +339,7 @@ def settings_installed_device(
     actions: CommandJson,
     user: UserVerifyDep,
     command_device_service: CommandDeviceServiceDep,
-):
+) -> None:
     try:
         if user.id is not None:
             command_device_service.execute_command(
