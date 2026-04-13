@@ -158,7 +158,7 @@ class InstalledDeviceService:
             raise InstalledDeviceUnauthorizedError(installed_device_id)
 
         # Actualizar solo los campos permitidos
-        update_data = request.model_dump(exclude_none=True)
+        update_data = request.model_dump()
 
         if len(update_data) == 0:
             return

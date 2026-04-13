@@ -16,7 +16,7 @@ class CreateInstalledDeviceRequest(BaseModel):
 
 
 class UpdateInstalledDeviceRequest(BaseModel):
-    name: str | None = Field(None, min_length=1, max_length=50)
+    name: str = Field(min_length=1, max_length=50)
     house_id: int | None = None
     area_id: int | None = None
 
