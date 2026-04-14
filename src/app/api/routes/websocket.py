@@ -12,6 +12,7 @@ from fastapi import (
 
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.service import StateDeviceServiceDep
+from app.exceptions.command_exception import StateNotFoundDeviceError
 
 router = APIRouter()
 
@@ -51,8 +52,17 @@ async def state_device(
     await websocket.accept()
     try:
         while True:
-            state = state_device_service.execute(user_id, installed_device_id)
-            await asyncio.sleep(0.2)
-            await websocket.send_json(state)
+            try:
+                state = state_device_service.execute(user_id, installed_device_id)
+                await websocket.send_json(state)
+                await asyncio.sleep(0.5)
+
+            except StateNotFoundDeviceError:
+                await websocket.send_json(
+                    {
+                        "status": "waiting",
+                        "message": "Dispositivo no conectado",
+                    }
+                )
     except WebSocketDisconnect:
         pass
