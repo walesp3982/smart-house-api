@@ -178,7 +178,7 @@ def register_installed_device(
         )
 
 
-@router.patch(
+@router.put(
     "/{installed_device_id}",
     responses={
         200: {
