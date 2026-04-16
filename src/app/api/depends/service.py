@@ -20,6 +20,7 @@ from app.services import (
     UserService,
 )
 from app.services.command_device import CommandDeviceService
+from app.services.ollama import OllamaConversationService
 from app.services.status_device import StateDeviceService
 
 from .mqtt import MQTTProviderDep
@@ -103,4 +104,26 @@ def get_state_device_service(
 StateDeviceServiceDep = Annotated[
     StateDeviceService,
     Depends(get_state_device_service),
+]
+
+
+def get_ollama_service(
+    installed_device_service: InstalledDeviceServiceDep,
+    state_device_service: StateDeviceServiceDep,
+    command_device_service: CommandDeviceServiceDep,
+    track_device_service: TrackDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
+) -> OllamaConversationService:
+    return OllamaConversationService(
+        installed_device_service=installed_device_service,
+        state_device_service=state_device_service,
+        command_device_service=command_device_service,
+        track_device_service=track_device_service,
+        mqtt_provider=mqtt_provider,
+    )
+
+
+OllamaConversationServiceDep = Annotated[
+    OllamaConversationService,
+    Depends(get_ollama_service),
 ]
