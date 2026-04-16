@@ -16,6 +16,8 @@ from app.exceptions import (
     UserNotFoundError,
 )
 from app.exceptions.user_exceptions import (
+    ResetPasswordTokenExpired,
+    ResetPasswordTokenInvalid,
     UserNotFoundByToken,
     VerificationEmailExpired,
     VerificationEmailInvalid,
@@ -107,6 +109,53 @@ class UserService:
                 html=content,
                 email_address=[NameEmail(name=user.name, email=user.email)],
             )
+
+    @staticmethod
+    def generate_password_reset_token(dto: UserEntity) -> None:
+        dto.password_reset_token = secrets.token_urlsafe(32)
+        dto.password_reset_token_expired_at = datetime.now(timezone.utc) + timedelta(
+            minutes=general_settings.expiration_minutes_password_reset
+        )
+
+    async def send_email_forgot_password(
+        self, user: UserEntity, url_reset_password: str
+    ):
+        if user.password_reset_token is None:
+            return
+        safe_token = quote(user.password_reset_token, safe="")
+        final_url = f"{url_reset_password}?token={safe_token}"
+        content = FactoryEmailContent.create(
+            type="forgot_password",
+            url=final_url,
+            name=user.name,
+            token=user.password_reset_token,
+        ).generate()
+        await self.email_sender.execute(
+            html=content,
+            email_address=[NameEmail(name=user.name, email=user.email)],
+        )
+
+    async def forgot_password(self, email: str, url_reset_password: str) -> None:
+        user = self.repository.get_by_email(email)
+        if user is None:
+            return
+        UserService.generate_password_reset_token(user)
+        self.repository.update(user)
+        await self.send_email_forgot_password(user, url_reset_password)
+
+    def reset_password(self, token: str, password: str) -> UserEntity:
+        user = self.repository.get_by_reset_token(token)
+        if user is None:
+            raise ResetPasswordTokenInvalid()
+        if user.password_reset_token_expired_at is None:
+            raise ResetPasswordTokenInvalid()
+        if utcnow() > normalize(user.password_reset_token_expired_at):
+            raise ResetPasswordTokenExpired()
+        user.password = self.password_hash.hash(password)
+        user.password_reset_token = None
+        user.password_reset_token_expired_at = None
+        self.repository.update(user)
+        return user
 
     def create_user(self, data: UserRegisterRequest) -> UserEntity:
         """

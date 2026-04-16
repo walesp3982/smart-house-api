@@ -41,3 +41,13 @@ class VerificationEmailInvalid(Exception):
 class VerificationEmailExpired(Exception):
     def __init__(self) -> None:
         super().__init__("Token expirado")
+
+
+class ResetPasswordTokenInvalid(Exception):
+    def __init__(self) -> None:
+        super().__init__("Token de restablecimiento inválido")
+
+
+class ResetPasswordTokenExpired(Exception):
+    def __init__(self) -> None:
+        super().__init__("Token de restablecimiento expirado")

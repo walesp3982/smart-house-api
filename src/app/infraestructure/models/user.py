@@ -12,4 +12,6 @@ users = Table(
     Column("is_verified", Boolean, nullable=False),
     Column("verification_token", String(100), nullable=True),
     Column("verification_token_expired_at", DateTime(timezone=True), nullable=True),
+    Column("password_reset_token", String(100), nullable=True),
+    Column("password_reset_token_expired_at", DateTime(timezone=True), nullable=True),
 )

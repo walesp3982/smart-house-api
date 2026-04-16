@@ -5,7 +5,11 @@ from pydantic import NameEmail
 
 from app.settings import connection_config_email, general_settings
 
-from .builder import EmailContentBuilder, VerificationEmailBuilder
+from .builder import (
+    EmailContentBuilder,
+    ForgotPasswordEmailBuilder,
+    VerificationEmailBuilder,
+)
 
 EmailOptionsliteral = Literal["verification", "forgot_password"]
 
@@ -16,6 +20,8 @@ class FactoryEmailContent:
         match type:
             case "verification":
                 return VerificationEmailBuilder(**kwargs)
+            case "forgot_password":
+                return ForgotPasswordEmailBuilder(**kwargs)
         raise ValueError()
 
 

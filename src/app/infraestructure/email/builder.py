@@ -32,3 +32,22 @@ class VerificationEmailBuilder(EmailContentBuilder):
             }
         )
         return content
+
+
+class ForgotPasswordEmailBuilder(EmailContentBuilder):
+    def __init__(self, url: str, name: str, token: str) -> None:
+        super().__init__()
+        self.url = url
+        self.name = name
+        self.token = token
+
+    def generate(self) -> str:
+        template = self.enviroment.get_template("email/forgot_password.html")
+        content = template.render(
+            {
+                "url": self.url,
+                "name": self.name,
+                "token": self.token,
+            }
+        )
+        return content

@@ -10,6 +10,8 @@ from .installed_device import (
 from .track_device import TrackDeviceResponse
 from .user import (
     CredencialsUserRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
     UserRegisterRequest,
     UserVerifiedStatusResponse,
     VisibleDataUserResponse,
@@ -18,6 +20,8 @@ from .voice import TranscribeResponse
 
 __all__ = [
     "CredencialsUserRequest",
+    "ForgotPasswordRequest",
+    "ResetPasswordRequest",
     "Payload",
     "VisibleDataUserResponse",
     "UserRegisterRequest",
