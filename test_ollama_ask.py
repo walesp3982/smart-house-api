@@ -4,7 +4,6 @@ Script de prueba para la ruta /ask con Ollama
 Verifica que el sistema responda preguntas correctamente
 """
 
-import json
 import sys
 
 import requests
@@ -74,9 +73,7 @@ def test_ask_endpoint():
                 if ask_response.status_code == 200:
                     response_data = ask_response.json()
                     print(f"📥 Respuesta: {response_data['response']}")
-                    print(
-                        f"   Historial: {len(response_data['conversation_history'])} mensajes"
-                    )
+                    print(f"   Historial: {len(response_data['conversation_history'])} mensajes")
                 else:
                     print(f"✗ Error {ask_response.status_code}: {ask_response.text}")
         else:

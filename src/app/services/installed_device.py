@@ -51,9 +51,7 @@ class InstalledDeviceService:
         """
         return self.repository.get_all_with_device(user_id)
 
-    def get_by_id(
-        self, installed_device_id: int, user_id: int
-    ) -> InstalledDeviceWithDevice:
+    def get_by_id(self, installed_device_id: int, user_id: int) -> InstalledDeviceWithDevice:
         """Obtiene un installed_device con la información del device asociado.
 
         Args:
@@ -104,9 +102,7 @@ class InstalledDeviceService:
 
         # Verificar que el código de verificación es correcto
         try:
-            is_valid = self.password_hash.verify(
-                request.code_verification, device.activation_code
-            )
+            is_valid = self.password_hash.verify(request.code_verification, device.activation_code)
             if not is_valid:
                 raise InstalledDeviceVerificationError()
         except Exception:

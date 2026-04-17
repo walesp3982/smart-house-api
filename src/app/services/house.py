@@ -15,9 +15,7 @@ class HouseService:
     def __init__(self, repository: HouseRepositoryProtocol):
         self.repository = repository
 
-    def create_new_house(
-        self, user_id: int, request: CreateHouseRequest
-    ) -> HouseEntity:
+    def create_new_house(self, user_id: int, request: CreateHouseRequest) -> HouseEntity:
         """
         Crea una nueva casa para el usuario
         Args:

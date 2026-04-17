@@ -10,9 +10,7 @@ from app.exceptions.device_exception import DeviceNotFoundByIdError
 def create_false_device(type: DeviceType) -> DeviceEntity:
     device_uuid = uuid4.__str__()
     code_activation = secrets.token_hex(4)
-    return DeviceEntity(
-        device_uuid=device_uuid, activation_code=code_activation, type=type
-    )
+    return DeviceEntity(device_uuid=device_uuid, activation_code=code_activation, type=type)
 
 
 def test_create_device(device_repo):

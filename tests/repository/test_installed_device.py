@@ -24,9 +24,7 @@ def create_installed_device_entity(
     )
 
 
-def test_create_installed_device(
-    installed_device_repo, create_device, create_house, create_user
-):
+def test_create_installed_device(installed_device_repo, create_device, create_house, create_user):
     """
     Testing de la creación de installed device en una db
     """
@@ -69,14 +67,12 @@ def test_installed_device_get_by_id(
 
     assert installed_device_id == db_installed_device.id
 
-    assert installed_device.model_dump(
+    assert installed_device.model_dump(exclude={"id"}) == db_installed_device.model_dump(
         exclude={"id"}
-    ) == db_installed_device.model_dump(exclude={"id"})
+    )
 
 
-def test_installed_device_get_all(
-    installed_device_repo, create_device, create_house, create_user
-):
+def test_installed_device_get_all(installed_device_repo, create_device, create_house, create_user):
     """
     Testing de la obtención de todos los installed devices
     """
@@ -168,17 +164,13 @@ def test_installed_device_get_all_with_filter_name(
 
     installed_device_repo.create(installed_device)
 
-    filtered_devices = installed_device_repo.get_all(
-        filters=FilterInstalledDevices(name="Living")
-    )
+    filtered_devices = installed_device_repo.get_all(filters=FilterInstalledDevices(name="Living"))
 
     assert len(filtered_devices) >= 1
     assert all("Living" in d.name for d in filtered_devices)
 
 
-def test_installed_device_update(
-    installed_device_repo, create_device, create_house, create_user
-):
+def test_installed_device_update(installed_device_repo, create_device, create_house, create_user):
     """
     Testing de la actualización de un installed device
     """
@@ -232,9 +224,7 @@ def test_installed_device_update_non_existent_raises_error(installed_device_repo
         installed_device_repo.update(installed_device)
 
 
-def test_installed_device_delete(
-    installed_device_repo, create_device, create_house, create_user
-):
+def test_installed_device_delete(installed_device_repo, create_device, create_house, create_user):
     """
     Testing de la eliminación de un installed device
     """

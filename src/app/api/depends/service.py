@@ -67,9 +67,7 @@ def get_installed_device_service(
     return InstalledDeviceService(installed_device_repository, device_repository)
 
 
-InstalledDeviceServiceDep = Annotated[
-    InstalledDeviceService, Depends(get_installed_device_service)
-]
+InstalledDeviceServiceDep = Annotated[InstalledDeviceService, Depends(get_installed_device_service)]
 
 
 def get_track_device_service(
@@ -89,9 +87,7 @@ def get_command_device_service(
     return CommandDeviceService(installed_device_service, mqtt_provider, track_service)
 
 
-CommandDeviceServiceDep = Annotated[
-    CommandDeviceService, Depends(get_command_device_service)
-]
+CommandDeviceServiceDep = Annotated[CommandDeviceService, Depends(get_command_device_service)]
 
 
 def get_state_device_service(

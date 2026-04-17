@@ -14,9 +14,7 @@ from app.exceptions.house_exception import (
 )
 
 
-def verify_house_ownership(
-    house_id: int, user: UserVerifyDep, house_service: HouseServiceDep
-):
+def verify_house_ownership(house_id: int, user: UserVerifyDep, house_service: HouseServiceDep):
     """Verifica que la casa pertenezca al usuario autenticado."""
     if user.id is None:
         raise HTTPException(

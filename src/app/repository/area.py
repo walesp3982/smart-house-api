@@ -49,11 +49,7 @@ class AreaRepository:
         if data.id is None:
             raise AreaEntityIdNotStartedError()
 
-        query = (
-            update(areas)
-            .values(**data.model_dump(exclude={"id"}))
-            .where(areas.c.id == data.id)
-        )
+        query = update(areas).values(**data.model_dump(exclude={"id"})).where(areas.c.id == data.id)
 
         try:
             result = self.conn.execute(query)

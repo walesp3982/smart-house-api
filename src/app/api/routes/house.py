@@ -75,9 +75,7 @@ def get_all_houses_with_areas(
         404: {"model": ErrorResponse, "description": "Casa no encontrada"},
     },
 )
-def get_house(
-    id: int, user: UserVerifyDep, house_service: HouseServiceDep
-) -> HouseResponse:
+def get_house(id: int, user: UserVerifyDep, house_service: HouseServiceDep) -> HouseResponse:
     if user.id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -87,13 +85,9 @@ def get_house(
         house = house_service.get_house_by_id(id, user.id)
         return HouseResponse.from_entity(house)
     except HouseNotFoundByIdError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Casa no encontrada"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Casa no encontrada")
     except HouseUnathorizadedError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Casa no autorizada"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Casa no autorizada")
 
 
 @router.put(

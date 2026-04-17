@@ -40,9 +40,7 @@ async def transcribe_audio(file: UploadFile = File(...)) -> TranscribeResponse:
             detail="No se subió ningún archivo",
         )
     if not file.filename.lower().endswith(".wav"):
-        raise HTTPException(
-            status_code=400, detail="Formato de audio no soportado. Usa WAV."
-        )
+        raise HTTPException(status_code=400, detail="Formato de audio no soportado. Usa WAV.")
 
     recognizer = sr.Recognizer()
     audio_bytes = await file.read()

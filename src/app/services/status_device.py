@@ -80,9 +80,7 @@ class StateDeviceService:
             StateNotFoundDeviceError: Cuando el dispositivo no
             tiene algún estado en el MQTT
         """
-        installed_device = self.installed_devices_service.get_by_id(
-            installed_device_id, user_id
-        )
+        installed_device = self.installed_devices_service.get_by_id(installed_device_id, user_id)
 
         data = self.mqtt_provider.get_topic(
             StateDeviceService.get_state_topics(

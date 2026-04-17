@@ -19,9 +19,7 @@ def test_ollama_directly():
     # Verifica que Ollama esté corriendo
     print("\n🔍 Verificando que Ollama está corriendo...")
     try:
-        result = subprocess.run(
-            ["ollama", "--version"], capture_output=True, text=True, timeout=5
-        )
+        result = subprocess.run(["ollama", "--version"], capture_output=True, text=True, timeout=5)
         print(f"✓ Ollama instalado: {result.stdout.strip()}")
     except FileNotFoundError:
         print("✗ Ollama no está instalado o no está en PATH")
@@ -79,7 +77,7 @@ def test_ollama_directly():
         "action": "on" o "off" o null,
         "description": "breve descripción"
     }
-    
+
     Analiza: "Apaga todas las luces"
     """
 
@@ -103,7 +101,7 @@ def test_ollama_directly():
 
             try:
                 parsed = json.loads(json_str)
-                print(f"\n   ✓ JSON válido detectado:")
+                print("\n   ✓ JSON válido detectado:")
                 print(f"   {json.dumps(parsed, indent=4, ensure_ascii=False)}")
             except json.JSONDecodeError as e:
                 print(f"   ✗ JSON inválido: {e}")
@@ -118,9 +116,7 @@ def test_ollama_directly():
     print("\n" + "=" * 70)
     print("PRUEBA COMPLETADA")
     print("=" * 70)
-    print(
-        "\n💡 Si Ollama responde correctamente, el sistema /ask funcionará sin problemas"
-    )
+    print("\n💡 Si Ollama responde correctamente, el sistema /ask funcionará sin problemas")
     print("   Próximo paso: Executar test_ollama_ask.py con un usuario registrado")
 
     return True

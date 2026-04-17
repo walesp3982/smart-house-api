@@ -32,9 +32,7 @@ class TrackDeviceRepository:
 
         return TrackDevice(**result) if result is not None else None
 
-    def get_all(
-        self, filters: Optional[FilterTrackDevices] = None
-    ) -> list[TrackDevice]:
+    def get_all(self, filters: Optional[FilterTrackDevices] = None) -> list[TrackDevice]:
         query = select(track_devices)
 
         if filters is not None:

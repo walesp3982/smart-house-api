@@ -17,8 +17,6 @@ def prod():
 
 def uvicorn_dev():
     try:
-        subprocess.run(
-            ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-        )
+        subprocess.run(["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"])
     except KeyboardInterrupt:
         pass

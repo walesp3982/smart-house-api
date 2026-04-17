@@ -91,12 +91,9 @@ class AreaService:
 
         # Verificar duplicado si se cambia el nombre
         if request.name is not None:
-            existing_areas = self.repository.get_all(
-                FilterAreas(house_id=area.house_id)
-            )
+            existing_areas = self.repository.get_all(FilterAreas(house_id=area.house_id))
             if any(
-                a.name.lower() == request.name.lower() and a.id != area_id
-                for a in existing_areas
+                a.name.lower() == request.name.lower() and a.id != area_id for a in existing_areas
             ):
                 raise DuplicateNameAreaError(request.name, area.house_id)
             area.name = request.name

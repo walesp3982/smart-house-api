@@ -24,6 +24,4 @@ class AreaResponse(BaseModel):
     def from_entity(cls, entity: AreaEntity) -> "AreaResponse":
         if entity.id is None:
             raise AreaEntityIdNotStartedError()
-        return cls(
-            id=entity.id, name=entity.name, type=entity.type, house_id=entity.house_id
-        )
+        return cls(id=entity.id, name=entity.name, type=entity.type, house_id=entity.house_id)

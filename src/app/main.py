@@ -1,5 +1,3 @@
-import json
-import subprocess
 from contextlib import asynccontextmanager
 from typing import Annotated
 
@@ -7,7 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from app.api.depends.auth import PayloadDep, get_user_current
+from app.api.depends.auth import get_user_current
 from app.api.depends.mqtt import get_mqtt_provider
 from app.api.depends.service import OllamaConversationServiceDep
 from app.api.routes import (

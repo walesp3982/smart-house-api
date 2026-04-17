@@ -61,21 +61,15 @@ class OllamaConversationService:
 
             for device in devices:
                 device_type = device.device.type.value
-                device_type_count[device_type] = (
-                    device_type_count.get(device_type, 0) + 1
-                )
+                device_type_count[device_type] = device_type_count.get(device_type, 0) + 1
 
                 try:
                     if device.id is None:
                         raise Exception("Id device not started")
                     state = self.state_device_service.execute(user_id, device.id)
-                    summary_lines.append(
-                        f"- {device.name} ({device_type}): {state.model_dump()}"
-                    )
+                    summary_lines.append(f"- {device.name} ({device_type}): {state.model_dump()}")
                 except Exception:
-                    summary_lines.append(
-                        f"- {device.name} ({device_type}): estado desconocido"
-                    )
+                    summary_lines.append(f"- {device.name} ({device_type}): estado desconocido")
 
             summary = "Dispositivos instalados:\n" + "\n".join(summary_lines)
             summary += f"\n\nResumen: {device_type_count}"
@@ -208,9 +202,7 @@ Responde con exactamente este JSON (sin explicaciones adicionales):
                         f"• {device.name}: {json.dumps(state_dict, ensure_ascii=False)}"
                     )
                 except Exception as e:
-                    response_lines.append(
-                        f"• {device.name}: no pude obtener el estado ({e})"
-                    )
+                    response_lines.append(f"• {device.name}: no pude obtener el estado ({e})")
 
             return "\n".join(response_lines)
 
@@ -242,11 +234,7 @@ Responde con exactamente este JSON (sin explicaciones adicionales):
             if failed:
                 response_parts.append(f"✗ No pude controlar: {', '.join(failed)}")
 
-            return (
-                "\n".join(response_parts)
-                if response_parts
-                else "No se ejecutó ninguna acción"
-            )
+            return "\n".join(response_parts) if response_parts else "No se ejecutó ninguna acción"
 
         else:
             return f"No entendí tu solicitud: {description}"
