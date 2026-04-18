@@ -62,7 +62,9 @@ async def state_device(
                 state = await run_in_threadpool(
                     state_device_service.execute, user_id, installed_device_id
                 )
-                await websocket.send_json(state.model_dump())
+                json_state = state.model_dump()
+                json_state["status"] = "active"
+                await websocket.send_json(json_state)
                 await asyncio.sleep(0.5)
 
             except StateNotFoundDeviceError:
