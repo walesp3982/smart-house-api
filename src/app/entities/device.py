@@ -86,3 +86,4 @@ class DeviceEntity(BaseModel):
     device_uuid: str
     activation_code: str
     type: DeviceType
+    chip_id: str | None = None

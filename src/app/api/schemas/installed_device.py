@@ -45,6 +45,7 @@ class DeviceResponse(BaseModel):
     id: int
     device_uuid: str
     type: DeviceType
+    chip_id: str | None
 
     @staticmethod
     def from_entity(entity: DeviceEntity):
@@ -54,6 +55,7 @@ class DeviceResponse(BaseModel):
             id=entity.id,
             device_uuid=entity.device_uuid,
             type=entity.type,
+            chip_id=entity.chip_id,
         )
 
 
