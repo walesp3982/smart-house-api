@@ -1,18 +1,21 @@
-from typing import Generator, Type, TypeVar
+from typing import Generator, Type
 
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
 
-from app.infraestructure.llm.interfaces.base import CreativityLevel, SizeResponse, get_max_token
+from app.infraestructure.llm.interfaces.base import (
+    BaseLLMProvider,
+    CreativityLevel,
+    SizeResponse,
+    TModel,
+    get_max_token,
+)
 from app.settings.ai_models import AIModelsSettings
 
 ai_models_settings = AIModelsSettings
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class GeminiProvider:
+class GeminiProvider(BaseLLMProvider):
     def __init__(self):
         self.client = genai.Client(api_key=ai_models_settings.gemini_api_key)
 
@@ -31,8 +34,8 @@ class GeminiProvider:
         user_message: str,
         creativity: CreativityLevel,
         size_response: SizeResponse,
-        schema: Type[T],
-    ) -> T:
+        schema: Type[TModel],
+    ) -> TModel:
         config_model = types.GenerateContentConfig(
             system_instruction=system_message,
             response_json_schema=schema.model_json_schema(),

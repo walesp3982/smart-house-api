@@ -1,19 +1,16 @@
-from typing import Generator, Type, TypeVar
+from typing import Generator, Type
 
 from groq import Groq
-from pydantic import BaseModel
 
 from app.exceptions.llm_exceptions import LLMResponseNotCreated
 from app.settings.ai_models import AIModelsSettings
 
-from .interfaces.base import CreativityLevel, SizeResponse, get_max_token
+from .interfaces.base import BaseLLMProvider, CreativityLevel, SizeResponse, TModel, get_max_token
 
 ai_models_settings = AIModelsSettings()
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class GroqProvider:
+class GroqProvider(BaseLLMProvider):
     def __init__(self):
         self.client = Groq(api_key=ai_models_settings.groq_api_key)
 
@@ -32,8 +29,8 @@ class GroqProvider:
         user_message: str,
         creativity: CreativityLevel,
         size_response: SizeResponse,
-        schema: Type[T],
-    ) -> T:
+        schema: Type[TModel],
+    ) -> TModel:
         temperature = self._get_temperature(creativity)
         chat_completion = self.client.chat.completions.create(
             messages=[

@@ -1,10 +1,11 @@
-from typing import Generator, Literal, Protocol, Type, TypeVar
+from abc import ABC, abstractmethod
+from typing import Generator, Literal, Type, TypeVar, runtime_checkable
 
 from pydantic import BaseModel
 
 CreativityLevel = Literal["LOW", "MEDIUM", "HIGH"]
 SizeResponse = Literal["SMALL", "MEDIUM", "BIG"]
-T = TypeVar("T", bound=BaseModel)
+TModel = TypeVar("TModel", bound=BaseModel)
 
 
 def get_max_token(size: SizeResponse):
@@ -17,15 +18,18 @@ def get_max_token(size: SizeResponse):
             return 100
 
 
-class BaseLLMProvider(Protocol):
+@runtime_checkable
+class BaseLLMProvider(ABC):
+    @abstractmethod
     def structured_chat(
         self,
         system_message: str,
         user_message: str,
         creativity: CreativityLevel,
         size_response: SizeResponse,
-        schema: Type[T],
-    ) -> T: ...
+        schema: Type[TModel],
+    ) -> TModel: ...
+    @abstractmethod
     def stream_chat(
         self,
         system_message: str,

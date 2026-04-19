@@ -1,15 +1,18 @@
-from typing import Generator, Type, TypeVar
+from typing import Generator, Type
 
 from ollama import ChatResponse, chat
-from pydantic import BaseModel
 
 from app.exceptions.llm_exceptions import LLMResponseNotCreated
-from app.infraestructure.llm.interfaces.base import CreativityLevel, SizeResponse, get_max_token
+from app.infraestructure.llm.interfaces.base import (
+    BaseLLMProvider,
+    CreativityLevel,
+    SizeResponse,
+    TModel,
+    get_max_token,
+)
 
-T = TypeVar("T", bound=BaseModel)
 
-
-class OllamaProvider:
+class OllamaProvider(BaseLLMProvider):
     def __init__(self, model: str = "llama2"):
         self.model = model
 
@@ -28,8 +31,8 @@ class OllamaProvider:
         user_message: str,
         creativity: CreativityLevel,
         size_response: SizeResponse,
-        schema: Type[T],
-    ) -> T:
+        schema: Type[TModel],
+    ) -> TModel:
         response: ChatResponse = chat(
             model=self.model,
             messages=[
