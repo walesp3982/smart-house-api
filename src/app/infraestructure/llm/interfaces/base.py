@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generator, Literal, Type, TypeVar, runtime_checkable
+from typing import Generator, Literal, Type, TypeVar
 
 from pydantic import BaseModel
 
@@ -18,7 +18,6 @@ def get_max_token(size: SizeResponse):
             return 100
 
 
-@runtime_checkable
 class BaseLLMProvider(ABC):
     @abstractmethod
     def structured_chat(
