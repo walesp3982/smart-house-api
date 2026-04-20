@@ -9,9 +9,12 @@ from fastapi import (
     WebSocketDisconnect,
     status,
 )
+from fastapi.concurrency import run_in_threadpool
+from pydantic import BaseModel
 
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.service import StateDeviceServiceDep
+from app.exceptions.command_exception import StateNotFoundDeviceError
 
 router = APIRouter()
 
@@ -23,8 +26,12 @@ async def expire_ticket(ticket: str, seconds: int):
     ws_tickets.pop(ticket, None)
 
 
+class TicketSocket(BaseModel):
+    ticket: str
+
+
 @router.post("/auth/ws-ticket")
-async def get_ws_ticket(user: UserVerifyDep):
+async def get_ws_ticket(user: UserVerifyDep) -> TicketSocket:
     ticket = secrets.token_urlsafe(32)
     if user.id is None:
         raise HTTPException(
@@ -33,10 +40,10 @@ async def get_ws_ticket(user: UserVerifyDep):
         )
     ws_tickets[ticket] = user.id
     asyncio.create_task(expire_ticket(ticket, 30))
-    return {"ticket": ticket}
+    return TicketSocket(ticket=ticket)
 
 
-@router.websocket("/ws/{installed_device}")
+@router.websocket("/ws/{installed_device_id}")
 async def state_device(
     websocket: WebSocket,
     installed_device_id: int,
@@ -51,8 +58,21 @@ async def state_device(
     await websocket.accept()
     try:
         while True:
-            state = state_device_service.execute(user_id, installed_device_id)
-            await asyncio.sleep(0.2)
-            await websocket.send_json(state)
+            try:
+                state = await run_in_threadpool(
+                    state_device_service.execute, user_id, installed_device_id
+                )
+                json_state = state.model_dump()
+                json_state["status"] = "active"
+                await websocket.send_json(json_state)
+                await asyncio.sleep(0.5)
+
+            except StateNotFoundDeviceError:
+                await websocket.send_json(
+                    {
+                        "status": "waiting",
+                        "message": "Dispositivo no conectado",
+                    }
+                )
     except WebSocketDisconnect:
         pass

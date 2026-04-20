@@ -12,4 +12,5 @@ devices = Table(
     Column("device_uuid", String(64), nullable=False, unique=True),
     Column("activation_code", String(100), nullable=False, unique=True),
     Column("type", Enum(DeviceType), nullable=False),
+    Column("chip_id", String(30), nullable=True),
 )

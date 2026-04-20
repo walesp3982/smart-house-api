@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends
@@ -6,15 +5,21 @@ from fastapi import Depends
 from app.infraestructure.mqtt.client import MQTTClient
 from app.infraestructure.mqtt.provider import MQTTProvider
 
+_mqtt_provider: MQTTProvider | None = None
 
-@lru_cache(maxsize=1)
+
+def init_mqtt_provider() -> None:
+    """
+    Inicializacióndel mqtt provider
+    """
+    global _mqtt_provider
+    _mqtt_provider = MQTTProvider(MQTTClient.get())
+
+
 def get_mqtt_provider() -> MQTTProvider:
-    """
-    lru_cache garantiza que solo se crea UNA instancia durante
-    all the lifetime de la aplicación (singleton)
-    """
-    client = MQTTClient.get()
-    return MQTTProvider(client)
+    if _mqtt_provider is None:
+        raise RuntimeError("MQTTProvider no fue inicializado")
+    return _mqtt_provider
 
 
 MQTTProviderDep = Annotated[MQTTProvider, Depends(get_mqtt_provider)]

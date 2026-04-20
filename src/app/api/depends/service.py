@@ -10,6 +10,8 @@ from app.api.depends.database import (
     TrackDeviceRepositoryDep,
     UserRepositoryDep,
 )
+from app.infraestructure.speech.protocol import SpeechRecognizerProtocol
+from app.infraestructure.speech.whisper import FasterWhisperRecognizer
 from app.services import (
     AreaService,
     DeviceService,
@@ -19,8 +21,10 @@ from app.services import (
     TrackDeviceService,
     UserService,
 )
+from app.services.chat_service import ChatConversationService
 from app.services.command_device import CommandDeviceService
 from app.services.status_device import StateDeviceService
+from app.services.voice_text import VoiceToTextService
 
 from .mqtt import MQTTProviderDep
 
@@ -103,4 +107,43 @@ def get_state_device_service(
 StateDeviceServiceDep = Annotated[
     StateDeviceService,
     Depends(get_state_device_service),
+]
+
+
+def get_ollama_service(
+    installed_device_service: InstalledDeviceServiceDep,
+    state_device_service: StateDeviceServiceDep,
+    command_device_service: CommandDeviceServiceDep,
+    track_device_service: TrackDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
+) -> ChatConversationService:
+    return ChatConversationService(
+        installed_device_service=installed_device_service,
+        track_device_service=track_device_service,
+        mqtt_provider=mqtt_provider,
+    )
+
+
+OllamaConversationServiceDep = Annotated[
+    ChatConversationService,
+    Depends(get_ollama_service),
+]
+
+
+def get_speech_recognizer_protocol() -> SpeechRecognizerProtocol:
+    return FasterWhisperRecognizer()
+
+
+SpeechRecognizerProtocolDep = Annotated[
+    SpeechRecognizerProtocol, Depends(get_speech_recognizer_protocol)
+]
+
+
+def get_voice_to_text_service(speech_recognized: SpeechRecognizerProtocolDep):
+    return VoiceToTextService(speech_recognized)
+
+
+VoiceToTextServiceDep = Annotated[
+    VoiceToTextService,
+    Depends(get_voice_to_text_service),
 ]

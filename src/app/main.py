@@ -3,10 +3,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.depends.mqtt import get_mqtt_provider
+from app.api.depends.mqtt import init_mqtt_provider
 from app.api.routes import (
     area,
     auth,
+    chat,
     device,
     house,
     installed_device,
@@ -22,13 +23,13 @@ from app.settings import general_settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     MQTTClient.connect()
-    get_mqtt_provider()
+    init_mqtt_provider()
 
     yield
     MQTTClient.disconnect()
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 origins = list(general_settings.cors_origins)
 
@@ -40,6 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rutas ya existentes
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(device.router)
@@ -49,6 +51,7 @@ app.include_router(installed_device.router)
 app.include_router(track_device.router)
 app.include_router(voice.router)
 app.include_router(websocket.router)
+app.include_router(chat.router)
 
 
 @app.get("/")
