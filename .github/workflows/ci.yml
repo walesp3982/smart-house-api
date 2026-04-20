@@ -12,7 +12,36 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      # Database settings (SQLite para tests)
+      DB_TYPE: sqlite
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: test
+      DB_PASSWORD: test
+      DB_NAME_DB: test_db
+      # Otras variables que necesite tu app
+      # ... etc
+       # MQTT
+      MQTT_HOST: localhost
+      MQTT_PORT: 1883
+      MQTT_USER: test
+      MQTT_PASSWORD: test
+      MQTT_TLS: false
+      MQTT_KEEPALIVE: 60
+      MQTT_CLIENT_ID: smart-house-api
+      # JWT
+      JWT_SECRET_KEY: test-secret-key-for-ci
+      JWT_EXPIRATION_MINUTES: 30
+      # Email
+      EMAIL_SERVER: localhost
+      EMAIL_PORT: 1025
+      EMAIL_USERNAME: test@test.com
+      EMAIL_PASSWORD: test
+      EMAIL_STARTTLS: false
+      EMAIL_SSL_TLS: false
+      EMAIL_USE_CREDENTIALS: false
+      EMAIL_FROM: test@test.com
     steps:
       - uses: actions/checkout@v6
 

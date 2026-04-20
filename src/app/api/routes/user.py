@@ -3,18 +3,26 @@ from fastapi.responses import RedirectResponse
 
 from app.api.depends import TokenJWTServiceDep, UserCurrentDep, UserServiceDep
 from app.api.schemas import (
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
     UserRegisterRequest,
     UserVerifiedStatusResponse,
     VisibleDataUserResponse,
 )
 from app.api.schemas.general import ErrorResponse
+from app.api.schemas.user import ForgotPasswordResponse, ResetPasswordResponse
 from app.exceptions import EmailAlreadyRegisterError
 from app.exceptions.user_exceptions import (
+    ResetPasswordTokenExpired,
+    ResetPasswordTokenInvalid,
     UserNotFoundByToken,
     VerificationEmailExpired,
     VerificationEmailInvalid,
 )
-from app.settings.enviroment import helper_url_verify_check_email
+from app.settings.enviroment import (
+    helper_url_reset_password,
+    helper_url_verify_check_email,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -38,6 +46,58 @@ async def register(
     except EmailAlreadyRegisterError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email ya registrado"
+        )
+
+
+@router.post(
+    "/forgot-password",
+    responses={
+        200: {
+            "description": "Se ha enviado un correo para restablecer la contraseña",
+        },
+    },
+)
+async def forgot_password(
+    data: ForgotPasswordRequest, user_service: UserServiceDep
+) -> ForgotPasswordResponse:
+    try:
+        await user_service.forgot_password(data.email, helper_url_reset_password())
+    except UserNotFoundByToken:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Email no registrado"
+        )
+    return ForgotPasswordResponse(
+        message="Se ha enviado un correo para restablecer la contraseña"
+    )
+
+
+@router.post(
+    "/reset-password/{token}",
+    responses={
+        200: {
+            "description": "Contraseña restablecida correctamente",
+        },
+        404: {"model": ErrorResponse, "description": "Token inválido"},
+        406: {"model": ErrorResponse, "description": "Token expirado"},
+    },
+)
+def reset_password(
+    token: str,
+    data: ResetPasswordRequest,
+    user_service: UserServiceDep,
+) -> ResetPasswordResponse:
+    try:
+        user_service.reset_password(token, data.password)
+        return ResetPasswordResponse(message="Contraseña restablecida correctamente.")
+    except ResetPasswordTokenInvalid:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Token de restablecimiento inválido",
+        )
+    except ResetPasswordTokenExpired:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Token de restablecimiento expirado",
         )
 
 

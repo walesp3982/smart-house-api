@@ -34,6 +34,9 @@ class GeneralSettings(BaseSettings):
     expiration_minutes_email_verification: int = (
         120  # 2 horas para tener válidar el expiration minutes
     )
+    expiration_minutes_password_reset: int = (
+        60  # 1 hora para restablecimiento de contraseña
+    )
     app_host: AnyUrl = AnyUrl("http://localhost:8000")
     app_name: str = "Application"
     frontend_url: HttpUrl = HttpUrl("http:localhost:3000")
@@ -68,3 +71,10 @@ def helper_url_verify_check_email(query: QueryVerifyEmail):
     final_url = f"{general_settings.frontend_url}/verify-email/callback?status={query}"
 
     return final_url
+
+
+def helper_url_reset_password() -> str:
+    """
+    Helper para construir la URL pública de restablecimiento de contraseña.
+    """
+    return f"{general_settings.frontend_url}/reset-password"

@@ -19,5 +19,21 @@ class UserRegisterRequest(BaseModel):
     password: str = Field(max_length=64)
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr = Field(max_length=50)
+
+
+class ResetPasswordRequest(BaseModel):
+    password: str = Field(max_length=64)
+
+
 class UserVerifiedStatusResponse(BaseModel):
     status: bool
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+
+
+class ResetPasswordResponse(BaseModel):
+    message: str

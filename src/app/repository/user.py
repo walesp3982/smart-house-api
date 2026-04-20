@@ -25,6 +25,8 @@ class UserRepository:
                 is_verified=row.is_verified,
                 verification_token=row.verification_token,
                 verification_token_expired_at=row.verification_token_expired_at,
+                password_reset_token=row.password_reset_token,
+                password_reset_token_expired_at=row.password_reset_token_expired_at,
             )
             for row in result.fetchall()
         ]
@@ -41,6 +43,8 @@ class UserRepository:
                 is_verified=result.is_verified,
                 verification_token=result.verification_token,
                 verification_token_expired_at=result.verification_token_expired_at,
+                password_reset_token=result.password_reset_token,
+                password_reset_token_expired_at=result.password_reset_token_expired_at,
             )
         return None
 
@@ -56,6 +60,8 @@ class UserRepository:
                 is_verified=result.is_verified,
                 verification_token=result.verification_token,
                 verification_token_expired_at=result.verification_token_expired_at,
+                password_reset_token=result.password_reset_token,
+                password_reset_token_expired_at=result.password_reset_token_expired_at,
             )
         return None
 
@@ -85,6 +91,16 @@ class UserRepository:
 
     def get_by_token(self, token: str) -> UserEntity | None:
         query = select(users).where(users.c.verification_token == token)
+
+        rows = self.connection.execute(query).fetchone()
+
+        if rows is None:
+            return None
+
+        return UserEntity(**rows._mapping)
+
+    def get_by_reset_token(self, token: str) -> UserEntity | None:
+        query = select(users).where(users.c.password_reset_token == token)
 
         rows = self.connection.execute(query).fetchone()
 
