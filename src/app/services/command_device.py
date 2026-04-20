@@ -42,7 +42,7 @@ class CommandDeviceService:
         if not correctParams(installed_device.device.type, request):
             raise IncorrectRequestCommandError()
 
-        topic = f"/{installed_device.device.device_uuid}/action"
+        topic = f"/{installed_device.device.device_uuid}/set"
         self.mqtt_provider.publish(topic, request.model_dump())
 
         if installed_device.id is None:
