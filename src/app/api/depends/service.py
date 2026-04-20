@@ -21,8 +21,8 @@ from app.services import (
     TrackDeviceService,
     UserService,
 )
+from app.services.chat_service import ChatConversationService
 from app.services.command_device import CommandDeviceService
-from app.services.ollama import ChatConversationService
 from app.services.status_device import StateDeviceService
 from app.services.voice_text import VoiceToTextService
 
