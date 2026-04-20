@@ -52,15 +52,13 @@ async def register(
     "/forgot-password",
     responses={
         200: {
-            "description": "Se ha enviado un correo para restablecer la contraseña si el email existe",
+            "description": "Se ha enviado un correo para restablecer la contraseña",
         },
     },
 )
 async def forgot_password(data: ForgotPasswordRequest, user_service: UserServiceDep):
     await user_service.forgot_password(data.email, helper_url_reset_password())
-    return {
-        "message": "Si el email existe, se ha enviado un correo para restablecer la contraseña."
-    }
+    return {"message": "Se ha enviado un correo para restablecer la contraseña."}
 
 
 @router.post(
