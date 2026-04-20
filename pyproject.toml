@@ -77,43 +77,11 @@ dependencies = [
 package = true
 
 [tool.ruff]
-target-version = "py314"
-line-length = 100
-exclude = [
-    ".venv",
-    "dist",
-    "build",
-    "__pycache__",
-]
-
-[tool.ruff.lint]
-select = [
-    "E",    # pycodestyle errors
-    "W",    # pycodestyle warnings
-    "F",    # pyflakes
-    "I",    # isort
-]
-ignore = [
-    "E501",  # Line too long
-]
+line-length = 88
+lint.select = ["E", "F", "I"]
 
 [tool.pyright]
-# Configuración de Pyright
-typeCheckingMode = "standard"
-pythonVersion = "3.14"
-pythonPlatform = "Windows"
-
-# Reportar configuraciones
-reportGeneralTypeIssues = "error"
-reportOptionalOperand = "error"
-reportOptionalSubscript = "error"
-reportConstantRedefinition = "error"
-reportUnusedVariable = "warning"
-reportUnusedImport = "warning"
-reportMissingImports = false
-
-# Excluir directorios
-exclude = ["**/node_modules", "**/__pycache__", ".git", ".venv"]
+typeCheckingMode = "standard" 
 
 [project.scripts]
 dev = "app.scripts.server:dev"
