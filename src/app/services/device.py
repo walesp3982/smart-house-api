@@ -22,6 +22,7 @@ class DeviceService:
             activation_code=encrip_activation_code,
             device_uuid=request.uuid,
             type=request.type,
+            chip_id=request.chip_id,
         )
 
         self.repository.create(data_device)
