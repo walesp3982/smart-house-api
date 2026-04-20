@@ -19,7 +19,7 @@ jobs:
       DB_PORT: 5432
       DB_USER: test
       DB_PASSWORD: test
-      DB_NAME: test_db
+      DB_NAME_DB: test_db
       # Otras variables que necesite tu app
       JWT_SECRET_KEY: test-secret-key-for-ci
       # ... etc
