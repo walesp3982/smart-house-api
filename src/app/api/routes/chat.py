@@ -41,15 +41,27 @@ def ask_ollama(
     """
     try:
 
+        def format_sse(token: str, event: str = "token") -> str:
+            # separa el token por saltos de línea
+            lines = token.replace("\r\n", "\n").split("\n")
+
+            # cada línea con su propio "data:"
+            data_lines = "".join(f"data: {line}\n" for line in lines)
+
+            return f"event: {event}\n{data_lines}\n"
+
         def generate():
-            if current_user.id is None:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
-            for token in ollama_service.chat(
-                user_message=request.question,
-                user_id=current_user.id,
-            ):
-                yield f"data: {token}\n\n"
-            yield "data: [DONE]\n\n"
+            try:
+                if current_user.id is None:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+                for token in ollama_service.chat(
+                    user_message=request.question,
+                    user_id=current_user.id,
+                ):
+                    yield format_sse(token)
+                yield format_sse("", event="done")
+            except Exception as e:
+                yield format_sse(str(e), event="error")
 
         return StreamingResponse(
             generate(),
