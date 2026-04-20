@@ -77,7 +77,9 @@ def test_get_by_id(house_repo, user_id):
 
     assert house_db is not None
     assert isinstance(house_db, HouseEntity)
-    assert house_entity.model_dump(exclude={"id"}) == house_db.model_dump(exclude={"id"})
+    assert house_entity.model_dump(exclude={"id"}) == house_db.model_dump(
+        exclude={"id"}
+    )
 
 
 def test_update_house(house_repo, user_id) -> None:

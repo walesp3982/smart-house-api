@@ -8,7 +8,9 @@ from app.exceptions.areas_exceptions import (
 from app.repository.interfaces import FilterAreas
 
 
-def create_area(name: str, house_id: int, type: AreaType = AreaType.living_room) -> AreaEntity:
+def create_area(
+    name: str, house_id: int, type: AreaType = AreaType.living_room
+) -> AreaEntity:
     return AreaEntity(name=name, type=type, house_id=house_id)
 
 

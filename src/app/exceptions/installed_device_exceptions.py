@@ -25,7 +25,9 @@ class InstalledDeviceAlreadyRegisteredError(InstalledDeviceException):
 
     def __init__(self, uuid: str):
         self.uuid = uuid
-        super().__init__(f"El dispositivo con uuid {uuid} ya fue registrado por otro usuario")
+        super().__init__(
+            f"El dispositivo con uuid {uuid} ya fue registrado por otro usuario"
+        )
 
 
 class InstalledDeviceVerificationError(InstalledDeviceException):
@@ -41,5 +43,6 @@ class InstalledDeviceUnauthorizedError(InstalledDeviceException):
     def __init__(self, installed_device_id: int):
         self.id = installed_device_id
         super().__init__(
-            "No tienes permiso para manejar este dispositivo" + f"con id {installed_device_id}"
+            "No tienes permiso para manejar este dispositivo"
+            + f"con id {installed_device_id}"
         )

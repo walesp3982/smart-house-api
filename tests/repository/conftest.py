@@ -45,7 +45,9 @@ def house_repo(connection):
 @pytest.fixture
 def user_id(user_repo):
     return user_repo.create(
-        UserEntity(name="juan", email="juan@gmail.com", password="password", is_verified=True)
+        UserEntity(
+            name="juan", email="juan@gmail.com", password="password", is_verified=True
+        )
     )
 
 
@@ -103,7 +105,9 @@ def create_device(device_repo) -> Callable[..., int]:
     def _create(type: DeviceType = DeviceType.LIGHT):
         device_uuid = uuid4().__str__()
         code_activation = secrets.token_hex(4)
-        device = DeviceEntity(device_uuid=device_uuid, activation_code=code_activation, type=type)
+        device = DeviceEntity(
+            device_uuid=device_uuid, activation_code=code_activation, type=type
+        )
         return device_repo.create(device)
 
     return _create

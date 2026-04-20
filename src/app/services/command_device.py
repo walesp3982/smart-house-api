@@ -18,7 +18,9 @@ class CommandDeviceService:
         self.mqtt_provider = mqtt_provider
         self.track_device_service = track_device_service
 
-    def execute_command(self, installed_device_id: int, user_id: int, request: CommandJson) -> None:
+    def execute_command(
+        self, installed_device_id: int, user_id: int, request: CommandJson
+    ) -> None:
         """
         Obtenemos le installed_device_id y ejecutamos la acción utilizando mqtt broker
 
@@ -33,7 +35,9 @@ class CommandDeviceService:
             InstalledDeviceNotFoundByIdError: Si el dispositivo no existe.
             InstalledDeviceUnauthorizedError: Si el dispositivo no pertenece al usuario.
         """
-        installed_device = self.installed_device_service.get_by_id(installed_device_id, user_id)
+        installed_device = self.installed_device_service.get_by_id(
+            installed_device_id, user_id
+        )
 
         if not correctParams(installed_device.device.type, request):
             raise IncorrectRequestCommandError()
@@ -50,6 +54,8 @@ class CommandDeviceService:
             case "on":
                 action = StatusDevice.ON
 
-        track = TrackDevice(device_id=installed_device.id, status=action, timestamp=utcnow())
+        track = TrackDevice(
+            device_id=installed_device.id, status=action, timestamp=utcnow()
+        )
 
         self.track_device_service.create_track_device(track)

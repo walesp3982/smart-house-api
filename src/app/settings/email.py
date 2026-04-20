@@ -12,7 +12,9 @@ class EmailSettings(BaseSettings):
     SSL_TLS: bool
     USE_CREDENTIALS: bool
     FROM: str
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="EMAIL_", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="EMAIL_", extra="ignore"
+    )
 
 
 email_settings = EmailSettings()  # pyright: ignore[reportCallIssue]

@@ -9,7 +9,9 @@ class MQTTBrokerSettings(BaseSettings):
     password: str = ""
     client_id: str = "smart-house-api"
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_prefix="MQTT_")
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="ignore", env_prefix="MQTT_"
+    )
 
 
 mqtt_broker_settings = MQTTBrokerSettings()

@@ -167,7 +167,9 @@ class ChatConversationService:
         )
         response = self.json_chat.structured_chat(
             system_message=SYSTEM_MESSAGE_JSON_ORDER,
-            user_message=generate_user_order(str_installed_devices, user_message=user_message),
+            user_message=generate_user_order(
+                str_installed_devices, user_message=user_message
+            ),
             creativity="LOW",
             size_response="MEDIUM",
             schema=ListOrderDevice,
@@ -196,7 +198,9 @@ class ChatConversationService:
             yield chunk
 
     def execute_orders(
-        self, orders: ListOrderDevice, installed_devices: list[InstalledDeviceWithDevice]
+        self,
+        orders: ListOrderDevice,
+        installed_devices: list[InstalledDeviceWithDevice],
     ) -> list[InstalledDeviceWithDevice]:
         # Obtenemos los id de los dispositivos
         id_installed_devices: list[int] = [device.id for device in orders.devices]
@@ -208,7 +212,9 @@ class ChatConversationService:
 
         for device in order_installed_devices:
             # obtenemos el nuevo estado según la order
-            device_order = [device for device in orders.devices if device == device.id][0]
+            device_order = [device for device in orders.devices if device == device.id][
+                0
+            ]
             self.publish_set_device(device, device_order.action)
 
             match device_order.action:
@@ -224,7 +230,9 @@ class ChatConversationService:
             )
         return order_installed_devices
 
-    def publish_set_device(self, device: InstalledDeviceWithDevice, state: Literal["on", "off"]):
+    def publish_set_device(
+        self, device: InstalledDeviceWithDevice, state: Literal["on", "off"]
+    ):
         topic = f"/{device.device.device_uuid}/set"
 
         self.mqtt_provider.publish(topic=topic, payload={"state": state})
@@ -239,7 +247,9 @@ class ChatConversationService:
 
         for chunk in self.stream_chat.stream_chat(
             system_message=SYSTEM_MESSAGE_QUERY,
-            user_message=get_prompt(device_states_summary=devices_state, user_message=user_message),
+            user_message=get_prompt(
+                device_states_summary=devices_state, user_message=user_message
+            ),
             creativity="MEDIUM",
             size_response="MEDIUM",
         ):
@@ -256,17 +266,22 @@ class ChatConversationService:
 
             for device in devices:
                 device_type = device.device.type.value
-                device_type_count[device_type] = device_type_count.get(device_type, 0) + 1
+                device_type_count[device_type] = (
+                    device_type_count.get(device_type, 0) + 1
+                )
 
                 try:
                     if device.id is None:
                         raise Exception("Id device not started")
                     state = self._state_device(device)
+                    str_state = state if state is not None else "estado desconocido"
                     summary_lines.append(
-                        f"- {device.name} ({device_type}): {state if state is not None else 'estado desconocido'}"
+                        f"- {device.name} ({device_type}): {str_state}"
                     )
                 except Exception:
-                    summary_lines.append(f"- {device.name} ({device_type}): estado desconocido")
+                    summary_lines.append(
+                        f"- {device.name} ({device_type}): estado desconocido"
+                    )
 
             summary = "Dispositivos instalados:\n" + "\n".join(summary_lines)
             summary += f"\n\nResumen: {device_type_count}"

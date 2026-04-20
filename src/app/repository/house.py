@@ -90,7 +90,11 @@ class HouseRepository:
     def update(self, data: HouseEntity) -> None:
         if data.id is None:
             raise HouseIdNotStarted()
-        query = update(houses).where(houses.c.id == data.id).values(data.model_dump(exclude={"id"}))
+        query = (
+            update(houses)
+            .where(houses.c.id == data.id)
+            .values(data.model_dump(exclude={"id"}))
+        )
         result = self.conn.execute(query)
         if result.rowcount == 0:
             raise HouseNotFoundByIdError(data.id)

@@ -153,7 +153,9 @@ class InstalledDeviceRepository:
             }
 
             device = DeviceEntity(**device_data)
-            devices_list.append(InstalledDeviceWithDevice(**installed_device_data, device=device))
+            devices_list.append(
+                InstalledDeviceWithDevice(**installed_device_data, device=device)
+            )
 
         return devices_list
 

@@ -72,4 +72,6 @@ def get_track_device_repository(connection: ConnectionDep):
     return TrackDeviceRepository(connection)
 
 
-TrackDeviceRepositoryDep = Annotated[TrackDeviceRepository, Depends(get_track_device_repository)]
+TrackDeviceRepositoryDep = Annotated[
+    TrackDeviceRepository, Depends(get_track_device_repository)
+]

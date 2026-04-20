@@ -50,7 +50,9 @@ def get_installed_devices(
     "/with-devices",
     responses={
         200: {
-            "description": ("Lista de dispositivos instalados con información del dispositivo"),
+            "description": (
+                "Lista de dispositivos instalados con información del dispositivo"
+            ),
         },
         400: {
             "model": ErrorResponse,
@@ -70,7 +72,10 @@ def get_installed_devices_with_device_info(
         )
 
     devices = service.get_all_with_device(user.id)
-    return [InstalledDeviceWithDeviceResponse.from_entity_compound(device) for device in devices]
+    return [
+        InstalledDeviceWithDeviceResponse.from_entity_compound(device)
+        for device in devices
+    ]
 
 
 @router.get(
@@ -293,7 +298,9 @@ def settings_installed_device(
 ) -> None:
     try:
         if user.id is not None:
-            command_device_service.execute_command(installed_device_id, user.id, actions)
+            command_device_service.execute_command(
+                installed_device_id, user.id, actions
+            )
     except IncorrectRequestCommandError:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,

@@ -29,7 +29,9 @@ def upgrade() -> None:
         sa.Column("activation_code", sa.String(length=100), nullable=False),
         sa.Column(
             "type",
-            sa.Enum("LIGHT", "THERMOSTAT", "CAMERA", "DOOR", "MOVEMENT", name="devicetype"),
+            sa.Enum(
+                "LIGHT", "THERMOSTAT", "CAMERA", "DOOR", "MOVEMENT", name="devicetype"
+            ),
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("id"),
@@ -44,7 +46,9 @@ def upgrade() -> None:
         sa.Column("password", sa.String(length=128), nullable=False),
         sa.Column("is_verified", sa.Boolean(), nullable=False),
         sa.Column("verification_token", sa.String(length=100), nullable=True),
-        sa.Column("verification_token_expired_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column(
+            "verification_token_expired_at", sa.DateTime(timezone=True), nullable=True
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
     )

@@ -36,7 +36,9 @@ async def register(
         user = await user_service.register_user(data, "/users/email-verification/")
         return VisibleDataUserResponse(**user.model_dump())
     except EmailAlreadyRegisterError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email ya registrado")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email ya registrado"
+        )
 
 
 @router.get(
@@ -63,7 +65,9 @@ def info_actual_user(actual_user: UserCurrentDep) -> VisibleDataUserResponse:
         401: {"model": ErrorResponse, "description": "Usuario no encontrado"},
     },
 )
-def get_verified_user(user_id: int, user_service: UserServiceDep) -> UserVerifiedStatusResponse:
+def get_verified_user(
+    user_id: int, user_service: UserServiceDep
+) -> UserVerifiedStatusResponse:
     is_verified = user_service.user_is_verified(user_id)
     return UserVerifiedStatusResponse(status=is_verified)
 

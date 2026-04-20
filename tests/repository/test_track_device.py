@@ -51,7 +51,9 @@ def test_track_device_get_by_id(track_device_repo, create_installed_device):
 
     assert track_device_id == db_track_device.id
 
-    assert track_device.model_dump(exclude={"id"}) == db_track_device.model_dump(exclude={"id"})
+    assert track_device.model_dump(exclude={"id"}) == db_track_device.model_dump(
+        exclude={"id"}
+    )
 
 
 def test_track_device_get_all(track_device_repo, create_installed_device, create_user):
@@ -62,8 +64,12 @@ def test_track_device_get_all(track_device_repo, create_installed_device, create
     installed_device_id_1 = create_installed_device(name="Device 1", user_id=user_id)
     installed_device_id_2 = create_installed_device(name="Device 2", user_id=user_id)
 
-    track_device_1 = create_track_device(device_id=installed_device_id_1, status=StatusDevice.ON)
-    track_device_2 = create_track_device(device_id=installed_device_id_2, status=StatusDevice.OFF)
+    track_device_1 = create_track_device(
+        device_id=installed_device_id_1, status=StatusDevice.ON
+    )
+    track_device_2 = create_track_device(
+        device_id=installed_device_id_2, status=StatusDevice.OFF
+    )
 
     track_device_repo.create(track_device_1)
     track_device_repo.create(track_device_2)
@@ -108,8 +114,12 @@ def test_track_device_get_all_with_filter_status(
     installed_device_id_1 = create_installed_device(name="Device 1", user_id=user_id)
     installed_device_id_2 = create_installed_device(name="Device 2", user_id=user_id)
 
-    track_device_1 = create_track_device(device_id=installed_device_id_1, status=StatusDevice.ON)
-    track_device_2 = create_track_device(device_id=installed_device_id_2, status=StatusDevice.OFF)
+    track_device_1 = create_track_device(
+        device_id=installed_device_id_1, status=StatusDevice.ON
+    )
+    track_device_2 = create_track_device(
+        device_id=installed_device_id_2, status=StatusDevice.OFF
+    )
 
     track_device_repo.create(track_device_1)
     track_device_repo.create(track_device_2)
@@ -128,7 +138,9 @@ def test_track_device_update(track_device_repo, create_installed_device):
     """
     installed_device_id = create_installed_device()
 
-    track_device = create_track_device(device_id=installed_device_id, status=StatusDevice.ON)
+    track_device = create_track_device(
+        device_id=installed_device_id, status=StatusDevice.ON
+    )
 
     track_device_id = track_device_repo.create(track_device)
 

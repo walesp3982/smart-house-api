@@ -5,7 +5,13 @@ from groq import Groq
 from app.exceptions.llm_exceptions import LLMResponseNotCreated
 from app.settings.ai_models import AIModelsSettings
 
-from .interfaces.base import BaseLLMProvider, CreativityLevel, SizeResponse, TModel, get_max_token
+from .interfaces.base import (
+    BaseLLMProvider,
+    CreativityLevel,
+    SizeResponse,
+    TModel,
+    get_max_token,
+)
 
 ai_models_settings = AIModelsSettings()
 

@@ -163,7 +163,9 @@ class UserService:
         await self.send_email_verification(user, url)
         return user
 
-    def get_user_by_credencials(self, credencials: CredencialsUserRequest) -> UserEntity:
+    def get_user_by_credencials(
+        self, credencials: CredencialsUserRequest
+    ) -> UserEntity:
         """
         Obtener el usuario mediante las credenciales
 
