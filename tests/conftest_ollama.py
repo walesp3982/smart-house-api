@@ -8,7 +8,7 @@ import pytest
 
 from app.entities.device import DeviceEntity, DeviceType
 from app.entities.installed_device import InstalledDeviceWithDevice
-from app.services.ollama import OllamaConversationService
+from app.services.ollama import ChatConversationService
 
 
 @pytest.fixture
@@ -57,7 +57,7 @@ def ollama_service_with_mocks(
     mock_mqtt_provider,
 ):
     """OllamaConversationService con todos los mocks"""
-    service = OllamaConversationService(
+    service = ChatConversationService(
         installed_device_service=mock_installed_device_service,
         state_device_service=mock_state_device_service,
         command_device_service=mock_command_device_service,

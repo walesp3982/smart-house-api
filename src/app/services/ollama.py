@@ -1,54 +1,249 @@
-import json
-import subprocess
-from typing import Any
+from typing import Generator, Literal
 
-from app.api.schemas.command import (
-    Camera,
-    Door,
-    Light,
-    MovementSensor,
-    TemperatureSensor,
-)
-from app.entities.device import DeviceType
+from pydantic import BaseModel
+
 from app.entities.installed_device import InstalledDeviceWithDevice
 from app.entities.track_device import StatusDevice, TrackDevice
+from app.infraestructure.llm.llm_provider import LLMFactoryProvider
 from app.infraestructure.mqtt.provider import MQTTProvider
-from app.services.command_device import CommandDeviceService
 from app.services.installed_device import InstalledDeviceService
-from app.services.status_device import StateDeviceService
 from app.services.track_device import TrackDeviceService
 from app.settings.time import utcnow
 
+"""
+Creación del request que tiene que devolver el orquestador
+"""
 
-class OllamaConversationService:
+
+class OrquestatorResponse(BaseModel):
+    mode: Literal["order", "query"]
+
+
+SYSTEM_MESSAGE_ORQUESTADOR = """
+Eres un asistente inteligente para una casa con dispositivos IoT.
+Analiza la siguiente del usuario y responde a si es orden(order)
+o consulta(query) con un JSON válido.
+"""
+
+"""
+Desde aquí es todo respecto a order send
+"""
+
+
+class OrderDevice(BaseModel):
+    id: int
+    action: Literal["on", "off"]
+    valid_action: bool
+
+
+class ListOrderDevice(BaseModel):
+    devices: list[OrderDevice]
+
+
+SYSTEM_MESSAGE_ORDER_SEND = """
+Eres un asistente inteligente para una casa con dispositivos Iot,
+Necesito que respondas un usuario para decirle que se va a ejecutar
+el comando con un tono formal y caballezco
+"""
+
+SYSTEM_MESSAGE_JSON_ORDER = """
+Eres un asistente inteligente para una casa con dispositivos Iot
+Necesito que resposne al mensaje del usuario con un json
+válido compuesto por un listado de id y la
+action correspondiente "on" | "off" del listado de json que
+se te va a obtener analizando el chat del usuario
+pueden ser acciones para un o varios dispositivos
+si el comando no corresponde a los estipulado no lo agregues al json
+"""
+
+SYSTEM_MESSAGE_ORDER_FAILED = """
+Eres el asistente inteligente para una casa con dispsitivos Iot
+Necesito que a partir del mensaje que mande el usuario le notifiques
+que no pudiste cumplir con la petición
+"""
+
+SYSTEM_MESSAGE_ORDER_SUCCESS = """
+Eres un asistente inteligente para una casa con dispositivos Iot
+Necesito que a partir del mensaje que mande al usuario se le notifique
+que se pudo cumplir con las ordenes, te voy a pasar un json con los
+dispositivos modificados para que indagues si existe un dispositivo
+que no puedo ser encontrado
+"""
+
+
+def generate_user_success(order_device: str, user_message: str):
+    return f"""
+DISPOSITIVOS QUE CAMBIARON DE ESTADO:
+{order_device}
+MENSAJE DEL USUARIO:
+{user_message}
+"""
+
+
+def generate_user_order(installed_devices: str, user_message: str):
+    return f"""
+DISPOSITIVOS DEL USUARIO:
+{installed_devices}
+MENSAJE DEL USUARIO:
+{user_message}
+"""
+
+
+"""
+ESTO ES PARA EL MODO CONSULTA
+"""
+SYSTEM_MESSAGE_QUERY = """
+Eres un asistente inteligente para una casa con dispositivos IoT.
+El usuario va consultar el resultado de ciertos dispositivos
+por lo que vas a analizar la información de dispositivo que
+se te va a proporcionar
+"""
+
+
+def get_prompt(device_states_summary: str, user_message: str):
+    prompt = f"""
+
+INFORMACIÓN DE DISPOSITIVOS:
+{device_states_summary}
+
+PREGUNTAS/ÓRDENES DEL USUARIO:
+{user_message}
+
+"""
+
+    return prompt
+
+
+class ChatConversationService:
     def __init__(
         self,
         installed_device_service: InstalledDeviceService,
-        state_device_service: StateDeviceService,
-        command_device_service: CommandDeviceService,
         track_device_service: TrackDeviceService,
         mqtt_provider: MQTTProvider,
     ):
         self.installed_device_service = installed_device_service
-        self.state_device_service = state_device_service
-        self.command_device_service = command_device_service
-        self.track_device_service = track_device_service
         self.mqtt_provider = mqtt_provider
-        self.conversation_history: list[dict[str, str]] = []
+        self.track_device_service = track_device_service
+        self.json_chat = LLMFactoryProvider.get_provider("gemini")
+        self.stream_chat = LLMFactoryProvider.get_provider("groq")
 
-    def _call_ollama(self, prompt: str, model: str = "llama2") -> str:
-        try:
-            resultado = subprocess.run(
-                ["ollama", "run", model, prompt],
-                capture_output=True,
-                text=True,
-                timeout=30,
+    def chat(self, user_message: str, user_id: int) -> Generator[str, None, None]:
+        response = self.json_chat.structured_chat(
+            system_message=SYSTEM_MESSAGE_ORQUESTADOR,
+            user_message=user_message,
+            size_response="MEDIUM",
+            creativity="LOW",
+            schema=OrquestatorResponse,
+        )
+
+        match response.mode:
+            case "order":
+                for response in self.mode_order_chat(user_message, user_id):
+                    yield response
+            case "query":
+                for response in self.mode_query_chat(user_message, user_id):
+                    yield response
+
+    def mode_order_chat(self, user_message: str, user_id) -> Generator[str, None, None]:
+        """
+        Aquí se trabaja con la lógica de que el mensaje del usuario se
+        considere como orden
+        """
+        # Mandamos un mensaje al usuario para confirmar que se va
+        # ejecutar el comando
+        for response_send in self.stream_chat.stream_chat(
+            system_message=SYSTEM_MESSAGE_ORDER_SEND,
+            user_message=user_message,
+            creativity="MEDIUM",
+            size_response="MEDIUM",
+        ):
+            yield response_send
+        yield "\n"
+
+        # Obtenemos los dispositivos actuales del usuario
+        installed_devices = self.installed_device_service.get_all_with_device(user_id)
+        str_installed_devices: str = "\n".join(
+            [device.model_dump_json() for device in installed_devices]
+        )
+        response = self.json_chat.structured_chat(
+            system_message=SYSTEM_MESSAGE_JSON_ORDER,
+            user_message=generate_user_order(str_installed_devices, user_message=user_message),
+            creativity="LOW",
+            size_response="MEDIUM",
+            schema=ListOrderDevice,
+        )
+
+        if len(response.devices) == 0:
+            for chunk in self.stream_chat.stream_chat(
+                system_message=SYSTEM_MESSAGE_ORDER_FAILED,
+                user_message=user_message,
+                creativity="MEDIUM",
+                size_response="MEDIUM",
+            ):
+                yield chunk
+            return
+
+        publish_installed_devices = self.execute_orders(response, installed_devices)
+        str_pub_isntalled_devices = "\n".join(
+            [device.model_dump_json() for device in publish_installed_devices]
+        )
+        for chunk in self.stream_chat.stream_chat(
+            system_message=SYSTEM_MESSAGE_ORDER_SUCCESS,
+            user_message=generate_user_success(str_pub_isntalled_devices, user_message),
+            creativity="MEDIUM",
+            size_response="MEDIUM",
+        ):
+            yield chunk
+
+    def execute_orders(
+        self, orders: ListOrderDevice, installed_devices: list[InstalledDeviceWithDevice]
+    ) -> list[InstalledDeviceWithDevice]:
+        # Obtenemos los id de los dispositivos
+        id_installed_devices: list[int] = [device.id for device in orders.devices]
+
+        # Obtenemos los installed_devices a ejecutar comandos
+        order_installed_devices = [
+            device for device in installed_devices if device in id_installed_devices
+        ]
+
+        for device in order_installed_devices:
+            # obtenemos el nuevo estado según la order
+            device_order = [device for device in orders.devices if device == device.id][0]
+            self.publish_set_device(device, device_order.action)
+
+            match device_order.action:
+                case "off":
+                    status = StatusDevice.OFF
+                case "on":
+                    status = StatusDevice.ON
+            device_id = device.id
+            if device_id is None:
+                break
+            self.track_device_service.create_track_device(
+                TrackDevice(device_id=device_id, status=status, timestamp=utcnow())
             )
-            return resultado.stdout.strip()
-        except subprocess.TimeoutExpired:
-            return "Error: Ollama tardó demasiado en responder"
-        except FileNotFoundError:
-            return "Error: Ollama no está instalado o no está en el PATH"
+        return order_installed_devices
+
+    def publish_set_device(self, device: InstalledDeviceWithDevice, state: Literal["on", "off"]):
+        topic = f"/{device.device.device_uuid}/set"
+
+        self.mqtt_provider.publish(topic=topic, payload={"state": state})
+
+    def _state_device(self, device: InstalledDeviceWithDevice):
+        topic = f"/{device.device.device_uuid}/value"
+        state = self.mqtt_provider.get_topic(topic)
+        return state
+
+    def mode_query_chat(self, user_message: str, user_id) -> Generator[str, None, None]:
+        devices_state = self._get_device_states_summary(user_id)
+
+        for chunk in self.stream_chat.stream_chat(
+            system_message=SYSTEM_MESSAGE_QUERY,
+            user_message=get_prompt(device_states_summary=devices_state, user_message=user_message),
+            creativity="MEDIUM",
+            size_response="MEDIUM",
+        ):
+            yield chunk
 
     def _get_device_states_summary(self, user_id: int) -> str:
         try:
@@ -66,8 +261,10 @@ class OllamaConversationService:
                 try:
                     if device.id is None:
                         raise Exception("Id device not started")
-                    state = self.state_device_service.execute(user_id, device.id)
-                    summary_lines.append(f"- {device.name} ({device_type}): {state.model_dump()}")
+                    state = self._state_device(device)
+                    summary_lines.append(
+                        f"- {device.name} ({device_type}): {state if state is not None else 'estado desconocido'}"
+                    )
                 except Exception:
                     summary_lines.append(f"- {device.name} ({device_type}): estado desconocido")
 
@@ -76,178 +273,3 @@ class OllamaConversationService:
             return summary
         except Exception as e:
             return f"Error obteniendo dispositivos: {str(e)}"
-
-    def _analyze_intent(self, user_message: str, user_id: int) -> dict[str, Any]:
-        device_states_summary = self._get_device_states_summary(user_id)
-
-        prompt = f"""Eres un asistente inteligente para una casa con dispositivos IoT.
-Analiza la siguiente pregunta/orden del usuario y responde SOLO con un JSON válido.
-
-INFORMACIÓN DE DISPOSITIVOS:
-{device_states_summary}
-
-PREGUNTAS/ÓRDENES DEL USUARIO:
-{user_message}
-
-Responde con exactamente este JSON (sin explicaciones adicionales):
-{{
-    "intent": "query" si es una pregunta, "command" si es una orden,
-    "device_types": ["light", "door", "camera", "movement", "temperature"] mencionados (puede haber múltiples),
-    "action": "on" si quiere encender, "off" si quiere apagar, null si no aplica,
-    "attribute": "brightness", "temperature", etc. o null,
-    "value": número si especifica un valor, o null,
-    "description": "traducción clara de lo que el usuario pide"
-}}"""
-
-        response = self._call_ollama(prompt)
-
-        try:
-            if "{" in response and "}" in response:
-                json_start = response.find("{")
-                json_end = response.rfind("}") + 1
-                json_str = response[json_start:json_end]
-                return json.loads(json_str)
-            else:
-                return json.loads(response)
-        except json.JSONDecodeError:
-            return {
-                "intent": "unknown",
-                "device_types": [],
-                "action": None,
-                "description": f"No pude entender: {response[:200]}",
-            }
-
-    def _find_devices_by_type(
-        self, user_id: int, device_types: list[str]
-    ) -> list[InstalledDeviceWithDevice]:
-        all_devices = self.installed_device_service.get_all_with_device(user_id)
-        matching = []
-
-        for device in all_devices:
-            device_type_value = device.device.type.value
-            if device_type_value in device_types:
-                matching.append(device)
-
-        return matching
-
-    def _execute_command_on_device(
-        self, device: InstalledDeviceWithDevice, action: str, user_id: int
-    ) -> bool:
-        try:
-            command_data: Any = None
-
-            if not (action == "on" or action == "off"):
-                raise
-            match device.device.type:
-                case DeviceType.LIGHT:
-                    command_data = Light(action=action)
-                case DeviceType.DOOR:
-                    command_data = Door(action=action)
-                case DeviceType.CAMERA:
-                    command_data = Camera(action=action)
-                case DeviceType.MOVEMENT:
-                    command_data = MovementSensor(action=action)
-                case DeviceType.THERMOSTAT:
-                    command_data = TemperatureSensor(
-                        action=action,
-                        enable_auto=False,
-                        has_limit=25,
-                    )
-                case _:
-                    return False
-
-            if command_data is None:
-                return False
-
-            topic = f"/{device.device.device_uuid}/action"
-            self.mqtt_provider.publish(topic, command_data.model_dump())
-
-            if device.id is None:
-                return False
-
-            status = StatusDevice.ON if action == "on" else StatusDevice.OFF
-            track = TrackDevice(
-                device_id=device.id,
-                status=status,
-                timestamp=utcnow(),
-            )
-            self.track_device_service.create_track_device(track)
-
-            return True
-        except Exception as e:
-            print(f"Error ejecutando comando: {e}")
-            return False
-
-    def _generate_response(self, intent_analysis: dict[str, Any], user_id: int) -> str:
-        intent = intent_analysis.get("intent")
-        device_types = intent_analysis.get("device_types", [])
-        action = intent_analysis.get("action")
-        description = intent_analysis.get("description", "Tu solicitud")
-
-        if intent == "query":
-            devices = self._find_devices_by_type(user_id, device_types)
-
-            if not devices:
-                return f"No encontré dispositivos de tipo {', '.join(device_types)}"
-
-            response_lines = [f"Respecto a tu pregunta: {description}\n"]
-
-            for device in devices:
-                try:
-                    if device.id is None:
-                        raise Exception("Device id not started")
-                    state = self.state_device_service.execute(user_id, device.id)
-                    state_dict = state.model_dump()
-                    response_lines.append(
-                        f"• {device.name}: {json.dumps(state_dict, ensure_ascii=False)}"
-                    )
-                except Exception as e:
-                    response_lines.append(f"• {device.name}: no pude obtener el estado ({e})")
-
-            return "\n".join(response_lines)
-
-        elif intent == "command":
-            if not action:
-                return f"No entendí qué acción ejecutar. {description}"
-
-            devices = self._find_devices_by_type(user_id, device_types)
-
-            if not devices:
-                return f"No encontré dispositivos de tipo {', '.join(device_types)} para controlar"
-
-            successfully_executed = []
-            failed = []
-
-            for device in devices:
-                if self._execute_command_on_device(device, action, user_id):
-                    successfully_executed.append(device.name)
-                else:
-                    failed.append(device.name)
-
-            response_parts = []
-            if successfully_executed:
-                action_desc = "encendido" if action == "on" else "apagado"
-                response_parts.append(
-                    f"✓ He {action_desc} correctamente: {', '.join(successfully_executed)}"
-                )
-
-            if failed:
-                response_parts.append(f"✗ No pude controlar: {', '.join(failed)}")
-
-            return "\n".join(response_parts) if response_parts else "No se ejecutó ninguna acción"
-
-        else:
-            return f"No entendí tu solicitud: {description}"
-
-    def process_message(self, user_message: str, user_id: int) -> str:
-        self.conversation_history.append({"role": "user", "content": user_message})
-        intent_analysis = self._analyze_intent(user_message, user_id)
-        response = self._generate_response(intent_analysis, user_id)
-        self.conversation_history.append({"role": "assistant", "content": response})
-        return response
-
-    def get_conversation_history(self) -> list[dict[str, str]]:
-        return self.conversation_history.copy()
-
-    def clear_history(self) -> None:
-        self.conversation_history = []
