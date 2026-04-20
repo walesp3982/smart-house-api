@@ -10,6 +10,7 @@ from app.api.schemas import (
     VisibleDataUserResponse,
 )
 from app.api.schemas.general import ErrorResponse
+from app.api.schemas.user import ForgotPasswordResponse, ResetPasswordResponse
 from app.exceptions import EmailAlreadyRegisterError
 from app.exceptions.user_exceptions import (
     ResetPasswordTokenExpired,
@@ -56,9 +57,18 @@ async def register(
         },
     },
 )
-async def forgot_password(data: ForgotPasswordRequest, user_service: UserServiceDep):
-    await user_service.forgot_password(data.email, helper_url_reset_password())
-    return {"message": "Se ha enviado un correo para restablecer la contraseña."}
+async def forgot_password(
+    data: ForgotPasswordRequest, user_service: UserServiceDep
+) -> ForgotPasswordResponse:
+    try:
+        await user_service.forgot_password(data.email, helper_url_reset_password())
+    except UserNotFoundByToken:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Email no registrado"
+        )
+    return ForgotPasswordResponse(
+        message="Se ha enviado un correo para restablecer la contraseña"
+    )
 
 
 @router.post(
@@ -75,10 +85,10 @@ def reset_password(
     token: str,
     data: ResetPasswordRequest,
     user_service: UserServiceDep,
-):
+) -> ResetPasswordResponse:
     try:
         user_service.reset_password(token, data.password)
-        return {"message": "Contraseña restablecida correctamente."}
+        return ResetPasswordResponse(message="Contraseña restablecida correctamente.")
     except ResetPasswordTokenInvalid:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

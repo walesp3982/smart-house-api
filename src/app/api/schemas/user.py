@@ -29,3 +29,11 @@ class ResetPasswordRequest(BaseModel):
 
 class UserVerifiedStatusResponse(BaseModel):
     status: bool
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+
+
+class ResetPasswordResponse(BaseModel):
+    message: str

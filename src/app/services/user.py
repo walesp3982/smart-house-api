@@ -138,7 +138,8 @@ class UserService:
     async def forgot_password(self, email: str, url_reset_password: str) -> None:
         user = self.repository.get_by_email(email)
         if user is None:
-            return
+            raise UserNotFoundByEmailError(email)
+
         UserService.generate_password_reset_token(user)
         self.repository.update(user)
         await self.send_email_forgot_password(user, url_reset_password)
