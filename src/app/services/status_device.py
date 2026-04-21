@@ -65,6 +65,24 @@ class StateDeviceService:
             case DeviceType.MOVEMENT:
                 return MovementState(**json_mqtt)
 
+    @staticmethod
+    def get_topic_online(chip_id: str) -> str:
+        return f"/{chip_id}/status"
+
+    def is_online(self, installed_device: InstalledDeviceWithDevice) -> bool:
+        if installed_device.device.chip_id is None:
+            return True
+
+        status: str | None = self.mqtt_provider.get_topic(
+            self.get_state_topics(installed_device.device.chip_id)
+        )
+
+        if status is None:
+            return False
+        if status == "online":
+            return True
+        return False
+
     def execute(self, user_id: int, installed_device_id: int) -> StateDeviceOption:
         """
         Obtenemos el estado actual del dispositivo en el MQTTBroker
