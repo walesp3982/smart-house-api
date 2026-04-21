@@ -8,7 +8,7 @@ ActionOption = Literal["on", "off"]
 
 
 class DeviceBase(BaseModel):
-    action: ActionOption
+    action: ActionOption | None
 
 
 class Door(DeviceBase):
@@ -28,8 +28,8 @@ class MovementSensor(DeviceBase):
 
 class TemperatureSensor(DeviceBase):
     type: Literal["temperature"] = "temperature"
-    enable_auto: bool
-    has_limit: int
+    enable_auto: bool | None
+    has_limit: int | None
 
 
 class Camera(DeviceBase):

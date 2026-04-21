@@ -43,19 +43,20 @@ class CommandDeviceService:
             raise IncorrectRequestCommandError()
 
         topic = f"/{installed_device.device.device_uuid}/set"
-        self.mqtt_provider.publish(topic, request.model_dump())
+        self.mqtt_provider.publish(topic, request.model_dump(exclude_none=True))
 
         if installed_device.id is None:
             raise Exception("Installed device no tiene id")
 
-        match request.action:
-            case "off":
-                action = StatusDevice.OFF
-            case "on":
-                action = StatusDevice.ON
+        if request.action:
+            match request.action:
+                case "off":
+                    action = StatusDevice.OFF
+                case "on":
+                    action = StatusDevice.ON
 
-        track = TrackDevice(
-            device_id=installed_device.id, status=action, timestamp=utcnow()
-        )
+            track = TrackDevice(
+                device_id=installed_device.id, status=action, timestamp=utcnow()
+            )
 
-        self.track_device_service.create_track_device(track)
+            self.track_device_service.create_track_device(track)
