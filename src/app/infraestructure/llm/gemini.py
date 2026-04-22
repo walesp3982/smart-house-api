@@ -12,7 +12,7 @@ from app.infraestructure.llm.interfaces.base import (
 )
 from app.settings.ai_models import AIModelsSettings
 
-ai_models_settings = AIModelsSettings
+ai_models_settings = AIModelsSettings()
 
 
 class GeminiProvider(BaseLLMProvider):
@@ -39,7 +39,7 @@ class GeminiProvider(BaseLLMProvider):
         config_model = types.GenerateContentConfig(
             system_instruction=system_message,
             response_json_schema=schema.model_json_schema(),
-            response_mime_type="application_json",
+            response_mime_type="application/json",
             temperature=self._get_temperature(creativity),
             max_output_tokens=get_max_token(size_response),
         )
@@ -72,6 +72,8 @@ class GeminiProvider(BaseLLMProvider):
         )
 
         for chunk in response:
-            text = chunk.text
-            if text is not None:
-                yield text
+            try:
+                if chunk.text:
+                    yield chunk.text
+            except IndexError, AttributeError, ValueError:
+                continue

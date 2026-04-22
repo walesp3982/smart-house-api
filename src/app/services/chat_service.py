@@ -66,8 +66,8 @@ SYSTEM_MESSAGE_ORDER_SUCCESS = """
 Eres un asistente inteligente para una casa con dispositivos Iot
 Necesito que a partir del mensaje que mande al usuario se le notifique
 que se pudo cumplir con las ordenes, te voy a pasar un json con los
-dispositivos modificados para que indagues si existe un dispositivo
-que no puedo ser encontrado
+dispositivos modificados para notificar como tipo listado las acciones 
+realizadas
 """
 
 
@@ -203,18 +203,28 @@ class ChatConversationService:
         installed_devices: list[InstalledDeviceWithDevice],
     ) -> list[InstalledDeviceWithDevice]:
         # Obtenemos los id de los dispositivos
-        id_installed_devices: list[int] = [device.id for device in orders.devices]
-
+        # id_installed_devices: list[int] = [device.id for device in orders.devices]
         # Obtenemos los installed_devices a ejecutar comandos
+        id_device_orden = [device.id for device in orders.devices]
+
         order_installed_devices = [
-            device for device in installed_devices if device in id_installed_devices
+            device for device in installed_devices if device.id in id_device_orden
         ]
 
         for device in order_installed_devices:
             # obtenemos el nuevo estado según la order
-            device_order = [device for device in orders.devices if device == device.id][
-                0
+            devices_order = [
+                device_order
+                for device_order in orders.devices
+                if device_order.id == device.id
             ]
+
+            if len(devices_order) == 0:
+                print("No se encontró el installed_device, abortando...")
+                continue
+
+            device_order = devices_order[0]
+
             self.publish_set_device(device, device_order.action)
 
             match device_order.action:
@@ -233,6 +243,7 @@ class ChatConversationService:
     def publish_set_device(
         self, device: InstalledDeviceWithDevice, state: Literal["on", "off"]
     ):
+        print("Publicando device... ")
         topic = f"/{device.device.device_uuid}/set"
 
         self.mqtt_provider.publish(topic=topic, payload={"state": state})
