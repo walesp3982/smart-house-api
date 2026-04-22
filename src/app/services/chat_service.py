@@ -243,7 +243,6 @@ class ChatConversationService:
     def publish_set_device(
         self, device: InstalledDeviceWithDevice, state: Literal["on", "off"]
     ):
-        print("Publicando device... ")
         topic = f"/{device.device.device_uuid}/set"
 
         self.mqtt_provider.publish(topic=topic, payload={"state": state})
