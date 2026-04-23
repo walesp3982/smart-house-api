@@ -31,7 +31,10 @@ async def transcribe_audio(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No se subió ningún archivo",
         )
-    if not file.filename.lower().endswith(".wav"):
+
+    SUPPORTED_FORMATS = (".wav", ".webm", ".mp3", ".ogg")
+
+    if not file.filename.lower().endswith(SUPPORTED_FORMATS):
         raise HTTPException(
             status_code=400, detail="Formato de audio no soportado. Usa WAV."
         )
@@ -39,7 +42,10 @@ async def transcribe_audio(
     audio_bytes = await file.read()
 
     try:
-        text = voice_to_text_service.process(audio_bytes)
+        content_type = file.content_type or ""
+        suffix = ".webm" if "webm" in content_type else ".wav"
+
+        text = voice_to_text_service.process(audio_bytes, suffix=suffix)
         return TranscribeResponse(transcription=text)
     except sr.UnknownValueError:
         raise HTTPException(status_code=400, detail="No se pudo reconocer el audio")

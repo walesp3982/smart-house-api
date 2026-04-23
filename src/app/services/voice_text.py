@@ -8,8 +8,8 @@ class VoiceToTextService:
     ):
         self._recognizer = recognizer
 
-    def process(self, wav_bytes: bytes) -> str:
+    def process(self, wav_bytes: bytes, suffix: str) -> str:
         ## Procesa el audio
-        text = self._recognizer.transcribe(wav_bytes)
+        text = self._recognizer.transcribe(wav_bytes, suffix=suffix)
 
         return text
