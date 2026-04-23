@@ -41,9 +41,10 @@ class ListOrderDevice(BaseModel):
 
 
 SYSTEM_MESSAGE_ORDER_SEND = """
-Eres un asistente inteligente para una casa con dispositivos Iot,
-Necesito que respondas un usuario para decirle que se va a ejecutar
-el comando con un tono formal y caballezco
+Eres un asistente de hogar inteligente. 
+Responde en UNA sola oración corta y natural confirmando que vas a ejecutar la orden.
+NO uses formato, NO uses listas, NO uses markdown.
+Ejemplo: "Entendido, voy a apagar la cámara del cuarto ahora mismo."
 """
 
 SYSTEM_MESSAGE_JSON_ORDER = """
@@ -57,17 +58,17 @@ si el comando no corresponde a los estipulado no lo agregues al json
 """
 
 SYSTEM_MESSAGE_ORDER_FAILED = """
-Eres el asistente inteligente para una casa con dispsitivos Iot
-Necesito que a partir del mensaje que mande el usuario le notifiques
-que no pudiste cumplir con la petición
+Eres un asistente de hogar inteligente.
+Informa al usuario en UNA oración que no pudiste ejecutar su orden.
+Sé breve y natural.
 """
 
 SYSTEM_MESSAGE_ORDER_SUCCESS = """
-Eres un asistente inteligente para una casa con dispositivos Iot
-Necesito que a partir del mensaje que mande al usuario se le notifique
-que se pudo cumplir con las ordenes, te voy a pasar un json con los
-dispositivos modificados para notificar como tipo listado las acciones 
-realizadas
+Eres un asistente de hogar inteligente.
+Notifica al usuario que su orden fue ejecutada exitosamente.
+Usa UN párrafo corto y natural. Menciona los dispositivos afectados con su nombre.
+NO uses JSON, NO uses bloques de código, NO repitas el razonamiento interno.
+Ejemplo: "Listo, la cámara del cuarto ha sido apagada correctamente."
 """
 
 
@@ -96,7 +97,10 @@ SYSTEM_MESSAGE_QUERY = """
 Eres un asistente inteligente para una casa con dispositivos IoT.
 El usuario va consultar el resultado de ciertos dispositivos
 por lo que vas a analizar la información de dispositivo que
-se te va a proporcionar
+se te va a proporcionarEres un asistente de hogar inteligente.
+Responde la consulta del usuario de forma natural y concisa.
+NO uses JSON, NO uses bloques de código.
+Usa lenguaje simple como si hablaras con el dueño de la casa.
 """
 
 
@@ -158,7 +162,9 @@ class ChatConversationService:
             size_response="MEDIUM",
         ):
             yield response_send
-        yield "\n"
+        yield "\n\n[NEXT_BUBBLE]\n\n"
+
+        yield "[PROCESSING]"
 
         # Obtenemos los dispositivos actuales del usuario
         installed_devices = self.installed_device_service.get_all_with_device(user_id)
@@ -174,6 +180,8 @@ class ChatConversationService:
             size_response="MEDIUM",
             schema=ListOrderDevice,
         )
+
+        yield "[DONE_PROCESSING]"
 
         if len(response.devices) == 0:
             for chunk in self.stream_chat.stream_chat(
