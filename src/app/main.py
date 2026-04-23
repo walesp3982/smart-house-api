@@ -16,6 +16,7 @@ from app.api.routes import (
     voice,
     websocket,
 )
+from app.infraestructure.database.engine import dispose_engine
 from app.infraestructure.mqtt.client import MQTTClient
 from app.settings import general_settings
 
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 
     yield
     MQTTClient.disconnect()
+    dispose_engine()
 
 
 app = FastAPI(lifespan=lifespan)
