@@ -62,7 +62,7 @@ async def state_device(
                 (is_online, state) = await run_in_threadpool(
                     state_device_service.execute, user_id, installed_device_id
                 )
-                json_state = state.model_dump()
+                json_state = state.model_dump(mode="json")
                 json_state["status"] = "online" if is_online else "offline"
                 await websocket.send_json(json_state)
                 await asyncio.sleep(0.5)
