@@ -80,7 +80,7 @@ async def state_device(
                 json_state = state.model_dump(mode="json")
                 json_state["status"] = "online" if is_online else "offline"
                 await websocket.send_json(json_state)
-                await asyncio.sleep(2)
+                await asyncio.sleep(0.5)
 
             except StateNotFoundDeviceError:
                 await websocket.send_json(
