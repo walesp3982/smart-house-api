@@ -13,8 +13,13 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 
 from app.api.depends.auth import UserVerifyDep
-from app.api.depends.service import StateDeviceServiceDep
+from app.api.depends.mqtt import MQTTProviderDep
 from app.exceptions.command_exception import StateNotFoundDeviceError
+from app.infraestructure.database.engine import get_engine
+from app.repository.device import DeviceRepository
+from app.repository.installed_device import InstalledDeviceRepository
+from app.services.installed_device import InstalledDeviceService
+from app.services.status_device import StateDeviceService
 
 router = APIRouter()
 
@@ -47,7 +52,7 @@ async def get_ws_ticket(user: UserVerifyDep) -> TicketSocket:
 async def state_device(
     websocket: WebSocket,
     installed_device_id: int,
-    state_device_service: StateDeviceServiceDep,
+    mqtt_provider: MQTTProviderDep,
     ticket: str = Query(...),
 ):
     user_id = ws_tickets.pop(ticket, None)
@@ -59,11 +64,21 @@ async def state_device(
     try:
         while True:
             try:
-                state = await run_in_threadpool(
-                    state_device_service.execute, user_id, installed_device_id
-                )
-                json_state = state.model_dump()
-                json_state["status"] = "active"
+
+                def _query():
+                    with get_engine().begin() as conn:
+                        service = StateDeviceService(
+                            InstalledDeviceService(
+                                InstalledDeviceRepository(conn), DeviceRepository(conn)
+                            ),
+                            mqtt_provider,
+                        )
+
+                        return service.execute(user_id, installed_device_id)
+
+                (is_online, state) = await run_in_threadpool(_query)
+                json_state = state.model_dump(mode="json")
+                json_state["status"] = "online" if is_online else "offline"
                 await websocket.send_json(json_state)
                 await asyncio.sleep(0.5)
 

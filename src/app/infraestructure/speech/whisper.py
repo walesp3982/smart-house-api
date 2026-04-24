@@ -10,8 +10,8 @@ class FasterWhisperRecognizer:
         self._model = WhisperModel(model_size, device="cpu", compute_type="int8")
         self._language = language
 
-    def transcribe(self, wav_bytes: bytes) -> str:
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+    def transcribe(self, wav_bytes: bytes, suffix: str = ".wav") -> str:
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
             f.write(wav_bytes)
             tmp_path = f.name
         try:

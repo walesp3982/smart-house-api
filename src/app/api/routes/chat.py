@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.service import OllamaConversationServiceDep
+from app.exceptions.user_exceptions import UserNotFoundError
 
 
 class AskRequest(BaseModel):
@@ -60,7 +61,7 @@ def ask_ollama(
                 ):
                     yield format_sse(token)
                 yield format_sse("", event="done")
-            except Exception as e:
+            except UserNotFoundError as e:
                 yield format_sse(str(e), event="error")
 
         return StreamingResponse(

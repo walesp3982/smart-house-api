@@ -83,7 +83,9 @@ class StateDeviceService:
             return True
         return False
 
-    def execute(self, user_id: int, installed_device_id: int) -> StateDeviceOption:
+    def execute(
+        self, user_id: int, installed_device_id: int
+    ) -> tuple[bool, StateDeviceOption]:
         """
         Obtenemos el estado actual del dispositivo en el MQTTBroker
 
@@ -111,6 +113,8 @@ class StateDeviceService:
         if data is None:
             raise StateNotFoundDeviceError
 
+        is_online = self.is_online(installed_device)
+
         response = self.building_json_response(installed_device, data)
 
-        return response
+        return (is_online, response)

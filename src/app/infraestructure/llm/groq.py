@@ -73,6 +73,8 @@ class GroqProvider(BaseLLMProvider):
             max_tokens=get_max_token(size_response),
         )
         for chuck in stream:
+            if not chuck.choices:
+                continue
             part = chuck.choices[0].delta.content
             if part is not None:
                 yield part
