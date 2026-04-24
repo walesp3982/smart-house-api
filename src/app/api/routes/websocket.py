@@ -14,12 +14,10 @@ from pydantic import BaseModel
 
 from app.api.depends.auth import UserVerifyDep
 from app.api.depends.mqtt import MQTTProviderDep
-from app.api.depends.service import StateDeviceServiceDep
 from app.exceptions.command_exception import StateNotFoundDeviceError
 from app.infraestructure.database.engine import get_engine
 from app.repository.device import DeviceRepository
 from app.repository.installed_device import InstalledDeviceRepository
-from app.repository.track_device import TrackDeviceRepository
 from app.services.installed_device import InstalledDeviceService
 from app.services.status_device import StateDeviceService
 
